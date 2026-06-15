@@ -421,28 +421,30 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
                     {item.story[1]?.text ?? item.projectName}
                   </p>
 
-                  <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-6 border-t border-white/[0.05]">
+                  <div className="mt-auto flex flex-wrap sm:flex-nowrap items-center justify-between gap-3 pt-6 border-t border-white/[0.05]">
                     <button
                       type="button"
                       aria-label={`Abrir historia de ${item.projectName}`}
                       onClick={(event) => openProject(item, event.currentTarget.closest("article"))}
-                      className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-xs font-medium text-black transition hover:bg-white/90 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                      className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-xs font-medium text-black transition hover:bg-white/90 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 w-full sm:w-auto justify-center"
                     >
                       <BookOpen size={14} />
                       Ver História
                     </button>
-                    <button
-                      type="button"
-                      aria-label={`Ampliar imagem de ${item.projectName}`}
-                      onClick={() => setLightboxItem(item)}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                    >
-                      <Maximize2 size={14} />
-                    </button>
-                    <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-sans tracking-wider uppercase">
-                      {item.device === "phone" ? <Smartphone size={12} /> : <Monitor size={12} />}
-                      {item.roleLabel}
-                    </span>
+                    <div className="flex items-center justify-between w-full sm:w-auto gap-3">
+                      <button
+                        type="button"
+                        aria-label={`Ampliar imagem de ${item.projectName}`}
+                        onClick={() => setLightboxItem(item)}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 shrink-0"
+                      >
+                        <Maximize2 size={14} />
+                      </button>
+                      <span className="inline-flex items-center gap-1.5 text-[10px] text-white/30 font-sans tracking-wider uppercase">
+                        {item.device === "phone" ? <Smartphone size={12} /> : <Monitor size={12} />}
+                        {item.roleLabel}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </article>

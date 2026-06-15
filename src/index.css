@@ -337,6 +337,12 @@ html.lenis body {
 }
 
 @media (max-width: 767px) {
+  .cinematic-about__shade {
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.8) 85%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.4) 45%, rgba(0, 0, 0, 0.9) 100%);
+  }
+
   .cinematic-about__copy--vision,
   .cinematic-about__copy--depth {
     top: 18vh;
@@ -348,13 +354,15 @@ html.lenis body {
   }
 
   .cinematic-about__title {
-    font-size: clamp(2rem, 12vw, 3.25rem);
+    font-size: clamp(1.75rem, 8vw, 2.5rem);
+    letter-spacing: -0.01em;
   }
 
   .cinematic-about__body {
     max-width: 24rem;
     font-size: 0.92rem;
     line-height: 1.55;
+    color: rgba(255, 255, 255, 0.82);
   }
 
   .cinematic-about__final-copy {
@@ -363,7 +371,7 @@ html.lenis body {
   }
 
   .cinematic-about__final-title {
-    font-size: clamp(2rem, 10vw, 3rem);
+    font-size: clamp(1.75rem, 8vw, 2.4rem);
   }
 }
 
@@ -1454,8 +1462,8 @@ html.lenis body {
   }
 
   .qa-immersive__cards {
-    grid-template-columns: 1fr;
-    gap: 0.65rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
   }
 
   .qa-immersive__card {

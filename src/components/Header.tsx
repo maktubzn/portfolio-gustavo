@@ -98,16 +98,16 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
       </button>
 
       {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 bg-black/98 z-40 flex flex-col items-center justify-center space-y-8 animate-fade-in pointer-events-auto">
+        <div className="md:hidden fixed inset-0 bg-black/92 backdrop-blur-2xl z-40 flex flex-col items-center justify-center space-y-6 animate-fade-in pointer-events-auto">
           {menuItems.map((item) => (
             <a
               key={item.label}
               href={`#${item.targetId}`}
               onClick={() => {
                 setMobileMenuOpen(false);
-                setTimeout(() => scrollToTarget(item.targetId), 100);
+                setTimeout(() => scrollToTarget(item.targetId), 150);
               }}
-              className="text-white/60 hover:text-white font-sans text-lg tracking-[0.16em] uppercase no-underline transition-colors"
+              className="text-white/70 hover:text-white font-sans text-xl tracking-[0.2em] uppercase no-underline transition-all duration-300 py-3 px-8 rounded-full border border-white/[0.03] bg-white/[0.02] hover:bg-white/[0.06] active:scale-95"
             >
               {item.label}
             </a>

@@ -73,7 +73,7 @@ export default function FooterSection() {
       </div>
 
       {/* Large exploding/aligning letters */}
-      <div className="flex justify-center items-center font-serif text-[11vw] leading-none text-white tracking-widest">
+      <div className="flex justify-center items-center font-serif text-[13vw] md:text-[11vw] leading-none text-white tracking-widest">
         {FOOTER_LETTERS.map((item, index) => (
           <span
             key={index}
