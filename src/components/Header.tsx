@@ -35,8 +35,12 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-40 px-6 py-6 md:px-12 flex items-center justify-between pointer-events-none transition-all duration-700 ${
-        isAboutActive ? "opacity-0 translate-y-[-20px] pointer-events-none" : "opacity-100 translate-y-0"
+      className={`fixed left-0 w-full z-40 px-6 py-6 md:px-12 flex items-center justify-between transition-all duration-700 ${
+        mobileMenuOpen ? "pointer-events-auto" : "pointer-events-none"
+      } ${
+        isAboutActive && !mobileMenuOpen
+          ? "opacity-0 -top-24 pointer-events-none"
+          : "opacity-100 top-0"
       }`}
     >
       <div className="pointer-events-auto flex items-center select-none">
@@ -47,7 +51,11 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
             scrollToTarget("hero");
           }}
           className={`font-sans font-bold text-[14px] md:text-[15px] tracking-[0.1em] uppercase no-underline transition-colors ${
-            isLightZoneActive ? "text-zinc-950 hover:text-zinc-700" : "text-white hover:text-white/80"
+            mobileMenuOpen
+              ? "text-white hover:text-white/80"
+              : isLightZoneActive
+                ? "text-zinc-950 hover:text-zinc-700"
+                : "text-white hover:text-white/80"
           }`}
         >
           Gustavo Alves
@@ -88,9 +96,11 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         className={`pointer-events-auto md:hidden p-2 z-50 cursor-pointer backdrop-blur-lg rounded-full focus:outline-none focus-visible:ring-2 transition-colors ${
-          isLightZoneActive
-            ? "text-zinc-800 hover:text-zinc-950 border border-black/10 bg-white/70 focus-visible:ring-black/30"
-            : "text-white/80 hover:text-white border border-white/[0.08] bg-black/40 focus-visible:ring-white/60"
+          mobileMenuOpen
+            ? "text-white/80 hover:text-white border border-white/[0.08] bg-black/40 focus-visible:ring-white/60"
+            : isLightZoneActive
+              ? "text-zinc-800 hover:text-zinc-950 border border-black/10 bg-white/70 focus-visible:ring-black/30"
+              : "text-white/80 hover:text-white border border-white/[0.08] bg-black/40 focus-visible:ring-white/60"
         }`}
         aria-label="Alternar menu de navegacao"
       >
