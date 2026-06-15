@@ -1,0 +1,79 @@
+# === Dependências ===
+node_modules/
+
+# === Build / Output ===
+dist/
+build/
+
+# === Variáveis de ambiente ===
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# === Logs ===
+*.log
+dev-server.err
+dev-server.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# === OS ===
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# === IDE / Editores ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === Playwright / Testes ===
+playwright-report/
+test-results/
+tests/
+playwright.config.ts
+
+# === Vídeos não utilizados (economizar espaço no GitHub) ===
+public/assets/videos/videogsap.mp4
+public/assets/videos/videogsap-scrub-all-i.mp4
+
+# === AI Studio config ===
+assets/.aistudio/
+
+# === Ferramentas de AI / Agentes ===
+.agents/
+.playwright-mcp/
+_ai_quality_lab/
+
+# === Protótipos / Rascunhos / Debug scripts ===
+_prototypes/
+scratch/
+tools/
+
+# === Scripts utilitários de debug (não necessários para rodar) ===
+capture_all_projects.js
+cdp_test.mjs
+diagnostic.mjs
+interactive_test.mjs
+start.bat
+
+# === Docs internos de desenvolvimento ===
+docs/
+
+# === Screenshots / Imagens avulsas na raiz ===
+*.png
+*.jpg
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.svg
+!src/**/*.png
+!src/**/*.jpg
+!src/**/*.svg
+
+# === Metadados ===
+metadata.json

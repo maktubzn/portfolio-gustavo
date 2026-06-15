@@ -1,0 +1,50 @@
+{
+  "generated_at": "2026-02-13T18:49:37.820Z",
+  "results": [
+    {
+      "app": "glowops",
+      "url": "http://localhost:5174/visao-geral",
+      "imgMissingAlt": 0,
+      "buttonMissingName": 0,
+      "unlabeledInputs": 0,
+      "landmarkMain": 0,
+      "headings": 0
+    },
+    {
+      "app": "glowops",
+      "url": "http://localhost:5174/agenda",
+      "imgMissingAlt": 0,
+      "buttonMissingName": 0,
+      "unlabeledInputs": 0,
+      "landmarkMain": 0,
+      "headings": 0
+    },
+    {
+      "app": "glowops",
+      "url": "http://localhost:5174/configuracoes",
+      "imgMissingAlt": 0,
+      "buttonMissingName": 0,
+      "unlabeledInputs": 0,
+      "landmarkMain": 0,
+      "headings": 0
+    },
+    {
+      "app": "glowagend",
+      "url": "http://localhost:5300/",
+      "imgMissingAlt": 0,
+      "buttonMissingName": 0,
+      "unlabeledInputs": 2,
+      "landmarkMain": 0,
+      "headings": 1
+    },
+    {
+      "app": "glowagend",
+      "url": "http://localhost:5300/reis-e-fios",
+      "imgMissingAlt": 0,
+      "buttonMissingName": 0,
+      "unlabeledInputs": 0,
+      "landmarkMain": 0,
+      "headings": 0
+    }
+  ]
+}

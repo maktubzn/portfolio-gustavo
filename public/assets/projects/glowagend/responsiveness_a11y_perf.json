@@ -1,0 +1,357 @@
+{
+  "generated_at": "2026-02-13T18:47:40.596Z",
+  "glowops": [
+    {
+      "viewport": "mobile-360x800",
+      "route": "/visao-geral",
+      "load_wall_ms": 658,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 388
+    },
+    {
+      "viewport": "mobile-360x800",
+      "route": "/agenda",
+      "load_wall_ms": 542,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 263
+    },
+    {
+      "viewport": "mobile-360x800",
+      "route": "/clientes",
+      "load_wall_ms": 573,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 295
+    },
+    {
+      "viewport": "mobile-360x800",
+      "route": "/financeiro",
+      "load_wall_ms": 579,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 299
+    },
+    {
+      "viewport": "mobile-360x800",
+      "route": "/configuracoes",
+      "load_wall_ms": 568,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 301
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/visao-geral",
+      "load_wall_ms": 496,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 232
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/agenda",
+      "load_wall_ms": 492,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 223
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/clientes",
+      "load_wall_ms": 542,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 266
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/financeiro",
+      "load_wall_ms": 527,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 263
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/configuracoes",
+      "load_wall_ms": 497,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 236
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/visao-geral",
+      "load_wall_ms": 601,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 333
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/agenda",
+      "load_wall_ms": 586,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 314
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/clientes",
+      "load_wall_ms": 576,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 295
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/financeiro",
+      "load_wall_ms": 575,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 297
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/configuracoes",
+      "load_wall_ms": 530,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 263
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/visao-geral",
+      "load_wall_ms": 672,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 397
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/agenda",
+      "load_wall_ms": 527,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 251
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/clientes",
+      "load_wall_ms": 578,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 300
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/financeiro",
+      "load_wall_ms": 607,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 327
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/configuracoes",
+      "load_wall_ms": 629,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 356
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/visao-geral",
+      "load_wall_ms": 574,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 306
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/agenda",
+      "load_wall_ms": 671,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 389
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/clientes",
+      "load_wall_ms": 689,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 428
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/financeiro",
+      "load_wall_ms": 594,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 321
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/configuracoes",
+      "load_wall_ms": 529,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 267
+    }
+  ],
+  "glowagend": [
+    {
+      "viewport": "mobile-360x800",
+      "route": "/",
+      "load_wall_ms": 789,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 1,
+      "focusable": 5,
+      "domContentLoadedMs": 514
+    },
+    {
+      "viewport": "mobile-360x800",
+      "route": "/reis-e-fios",
+      "load_wall_ms": 438,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 173
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/",
+      "load_wall_ms": 654,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 1,
+      "focusable": 5,
+      "domContentLoadedMs": 384
+    },
+    {
+      "viewport": "tablet-768x1024",
+      "route": "/reis-e-fios",
+      "load_wall_ms": 402,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 134
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/",
+      "load_wall_ms": 767,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 1,
+      "focusable": 5,
+      "domContentLoadedMs": 499
+    },
+    {
+      "viewport": "laptop-1366x768",
+      "route": "/reis-e-fios",
+      "load_wall_ms": 474,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 200
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/",
+      "load_wall_ms": 863,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 1,
+      "focusable": 5,
+      "domContentLoadedMs": 596
+    },
+    {
+      "viewport": "desktop-1600x900",
+      "route": "/reis-e-fios",
+      "load_wall_ms": 478,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 203
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/",
+      "load_wall_ms": 861,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 1,
+      "focusable": 5,
+      "domContentLoadedMs": 588
+    },
+    {
+      "viewport": "desktop-1920x1080",
+      "route": "/reis-e-fios",
+      "load_wall_ms": 464,
+      "overflowX": false,
+      "overflowY": false,
+      "headingCount": 0,
+      "focusable": 1,
+      "domContentLoadedMs": 195
+    }
+  ]
+}
