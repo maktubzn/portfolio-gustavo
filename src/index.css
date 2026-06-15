@@ -1178,7 +1178,8 @@ html.lenis body {
   z-index: 6;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-end;
+  padding-bottom: clamp(3rem, 7vh, 5.5rem);
   width: min(1160px, calc(100% - 3rem));
   margin: 0 auto;
   left: 50%;
@@ -1297,7 +1298,7 @@ html.lenis body {
   border-top-color: rgba(24, 21, 18, 0.08) !important;
 }
 
-.light-showcase > * {
+.light-showcase > *:not(.pointer-events-none) {
   position: relative;
   z-index: 1;
 }
@@ -1446,6 +1447,7 @@ html.lenis body {
   .qa-immersive__final {
     width: min(520px, calc(100% - 2rem));
     justify-content: center;
+    padding-bottom: 0;
   }
 
   .qa-immersive__final-header {

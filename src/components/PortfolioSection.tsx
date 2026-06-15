@@ -324,7 +324,7 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
       onMouseLeave={() => setIsHovered(false)}
       className="portfolio-light light-showcase relative z-10 flex flex-col items-center border-t border-white/5 bg-black pt-12 pb-24 text-white md:pt-16 md:pb-36"
     >
-      <FluidCursor isActive={isHovered} theme="light" className="absolute inset-0 z-0 w-full h-full" />
+      <FluidCursor isActive={isHovered} theme="light" className="!absolute inset-0 !z-0 w-full h-full" />
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="relative mb-16 flex items-end justify-between gap-8 md:mb-24">
           <motion.div style={{ x: smoothX, y: smoothY }}>
