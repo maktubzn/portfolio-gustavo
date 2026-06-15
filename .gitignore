@@ -41,6 +41,8 @@ playwright.config.ts
 # === Vídeos não utilizados (economizar espaço no GitHub) ===
 public/assets/videos/videogsap.mp4
 public/assets/videos/videogsap-scrub-all-i.mp4
+public/From Klickpin.com- Explore these 20 Cozy wedding hair ideas that feel fresh elevated and surprisingly easy to recreate at home for anyone who love.mp4
+public/imervid.mp4
 
 # === AI Studio config ===
 assets/.aistudio/

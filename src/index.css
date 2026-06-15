@@ -1483,3 +1483,245 @@ html.lenis body {
     font-size: 0.78rem;
   }
 }
+
+/* Project case-study entrance: card -> constructed object -> tunnel -> dark story */
+.project-entry {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  overflow: hidden;
+  background: #030304;
+  color: #ffffff;
+  pointer-events: none;
+  perspective: 1300px;
+}
+
+.project-entry__ambient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at var(--origin-center-x) var(--origin-center-y), color-mix(in srgb, var(--project-accent) 38%, transparent), transparent 28%),
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.08), transparent 30%),
+    linear-gradient(180deg, rgba(251, 248, 241, 0.14), #030304 64%);
+}
+
+.project-entry__ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.92' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.24'/%3E%3C/svg%3E");
+}
+
+.project-entry__tunnel,
+.project-entry__blackout,
+.project-entry__title {
+  position: absolute;
+  inset: 0;
+}
+
+.project-entry__tunnel {
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  visibility: hidden;
+  transform-origin: 50% 50%;
+}
+
+.project-entry__blackout {
+  z-index: 3;
+  opacity: 0;
+  visibility: hidden;
+  background:
+    radial-gradient(circle at 50% 48%, transparent 0%, rgba(0, 0, 0, 0.58) 36%, #000000 72%),
+    #000000;
+}
+
+.project-entry__portal {
+  position: absolute;
+  z-index: 4;
+  overflow: visible;
+  border-radius: 1.3rem;
+  transform-style: preserve-3d;
+  will-change: left, top, width, height, transform, opacity, filter;
+}
+
+.project-entry__layer {
+  position: absolute;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 1.15rem;
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(16px);
+  will-change: transform, opacity, filter;
+}
+
+.project-entry__layer--back {
+  inset: -10%;
+  background:
+    radial-gradient(circle at 76% 18%, color-mix(in srgb, var(--project-accent) 54%, transparent), transparent 26%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.17), rgba(255, 255, 255, 0.035));
+}
+
+.project-entry__layer--image {
+  inset: 0;
+  background: #050505;
+}
+
+.project-entry__layer--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  filter: saturate(0.95) contrast(1.05);
+}
+
+.project-entry__layer--image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.72)),
+    radial-gradient(circle at 78% 22%, color-mix(in srgb, var(--project-accent) 30%, transparent), transparent 28%);
+}
+
+.project-entry__layer--blueprint {
+  inset: 8% 10% auto auto;
+  display: grid;
+  height: 8.25rem;
+  width: 13rem;
+  gap: 0.65rem;
+  padding: 0.95rem;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    color-mix(in srgb, var(--project-accent) 12%, rgba(5, 5, 6, 0.66));
+  background-size: 18px 18px;
+}
+
+.project-entry__layer--blueprint span {
+  display: block;
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--project-accent) 74%, white), transparent);
+  opacity: 0.72;
+}
+
+.project-entry__layer--blueprint span:nth-child(2) {
+  width: 74%;
+}
+
+.project-entry__layer--blueprint span:nth-child(3) {
+  width: 52%;
+}
+
+.project-entry__layer--top {
+  left: 6%;
+  right: 6%;
+  bottom: 7%;
+  min-height: 5.8rem;
+  padding: 1rem;
+  background: rgba(5, 5, 6, 0.72);
+}
+
+.project-entry__layer--top span,
+.project-entry__layer--chip {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.project-entry__layer--top strong {
+  display: block;
+  margin-top: 0.55rem;
+  font-family: var(--font-serif);
+  font-size: clamp(1.65rem, 4vw, 4rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.project-entry__layer--chip {
+  display: grid;
+  place-items: center;
+  min-width: 8.8rem;
+  min-height: 2.35rem;
+  padding: 0 1rem;
+  background: color-mix(in srgb, var(--project-accent) 20%, rgba(5, 5, 6, 0.76));
+}
+
+.project-entry__layer--chip-a {
+  right: -7%;
+  top: 9%;
+}
+
+.project-entry__layer--chip-b {
+  left: -6%;
+  top: 24%;
+}
+
+.project-entry__title {
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  opacity: 0;
+  visibility: hidden;
+  padding: 2rem;
+  text-align: center;
+}
+
+.project-entry__title span {
+  margin-bottom: 1rem;
+  color: color-mix(in srgb, var(--project-accent) 72%, white);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.project-entry__title h2 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: clamp(3.4rem, 10vw, 9rem);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  text-shadow: 0 24px 90px color-mix(in srgb, var(--project-accent) 45%, transparent);
+}
+
+.project-case-hero {
+  background:
+    radial-gradient(circle at 74% 20%, color-mix(in srgb, var(--project-accent) 20%, transparent), transparent 28%),
+    #060608;
+}
+
+.project-case-hero h1 {
+  text-shadow: 0 24px 100px color-mix(in srgb, var(--project-accent) 38%, transparent);
+}
+
+@media (max-width: 767px) {
+  .project-entry__portal {
+    transform: translateZ(0);
+  }
+
+  .project-entry__layer--top {
+    min-height: 4.9rem;
+  }
+
+  .project-entry__layer--top strong {
+    font-size: clamp(1.45rem, 10vw, 2.8rem);
+  }
+
+  .project-entry__layer--chip {
+    min-width: 6.8rem;
+    min-height: 2rem;
+    font-size: 0.54rem;
+  }
+}

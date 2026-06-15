@@ -5,10 +5,12 @@
  * ScrollTrigger dentro do modal para nao competir com Lenis e com o scroll nativo.
  */
 
-import { useEffect, useMemo, useRef, type ComponentType } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType, type CSSProperties } from "react";
 import { motion } from "motion/react";
-import { X, Layers, ShieldCheck, Cpu, Code, CheckCircle } from "lucide-react";
+import gsap from "gsap";
+import { X, Layers, ShieldCheck, Cpu, Code, CheckCircle, Maximize2 } from "lucide-react";
 import NumberTicker from "./ui/NumberTicker";
+import MediaLightbox, { type MediaLightboxItem } from "./MediaLightbox";
 import { CardData, CardViewportRect } from "../types";
 
 interface ProjectPresentationViewProps {
@@ -17,16 +19,20 @@ interface ProjectPresentationViewProps {
   onCloseRequest: () => void;
 }
 
-const PROJECT_VIDEOS: Record<number, string> = {
-  1: "/assets/videos/14264710_1920_1080_30fps.mp4",
-};
-
 const PROJECT_ACCENTS: Record<number, string> = {
-  1: "#8b5cf6",
+  1: "#f97316",
   2: "#ec4899",
   3: "#38bdf8",
   4: "#34d399",
   5: "#f43f5e",
+};
+
+const PROJECT_ACCENT_NAMES: Record<number, string> = {
+  1: "GS orange",
+  2: "arcade pink",
+  3: "mechanic blue",
+  4: "QA teal",
+  5: "glow coral",
 };
 
 function ProjectBackgroundCanvas({ projectId }: { projectId: number }) {
@@ -229,16 +235,37 @@ function findPhase(card: CardData, pattern: RegExp) {
   return card.story.find((step) => pattern.test(`${step.phase} ${step.title}`));
 }
 
-function EvidenceImage({ src, title, index }: { key?: string; src: string; title: string; index: number }) {
+function EvidenceImage({
+  src,
+  title,
+  index,
+  onOpen,
+}: {
+  key?: string;
+  src: string;
+  title: string;
+  index: number;
+  onOpen: () => void;
+}) {
   return (
     <figure className="group overflow-hidden rounded-xl border border-white/[0.07] bg-[#0c0c0e]">
       <div className="aspect-[16/10] overflow-hidden bg-black">
-        <img
-          src={src}
-          alt={`${title} evidencia ${index + 1}`}
-          className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-[1.03] group-hover:opacity-100"
-          loading="lazy"
-        />
+        <button
+          type="button"
+          onClick={onOpen}
+          className="relative h-full w-full cursor-zoom-in overflow-hidden text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+          aria-label={`Ampliar evidencia ${index + 1} de ${title}`}
+        >
+          <img
+            src={src}
+            alt={`${title} evidencia ${index + 1}`}
+            className="h-full w-full object-cover opacity-90 transition duration-500 group-hover:scale-[1.03] group-hover:opacity-100"
+            loading="lazy"
+          />
+          <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-black/60 text-white/75 backdrop-blur transition group-hover:bg-white group-hover:text-black">
+            <Maximize2 size={14} />
+          </span>
+        </button>
       </div>
       <figcaption className="border-t border-white/[0.06] px-4 py-3 text-[10px] uppercase tracking-[0.2em] text-white/35">
         Evidencia {String(index + 1).padStart(2, "0")}
@@ -253,24 +280,83 @@ export default function ProjectPresentationView({
   onCloseRequest,
 }: ProjectPresentationViewProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  const introRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const videoSrc = PROJECT_VIDEOS[card.id] || "";
+  const tunnelVideoRef = useRef<HTMLVideoElement>(null);
   const screenshots = PROJECT_SCREENSHOTS[card.id] || [];
   const showcase = SHOWCASE_RESOURCES[card.id];
   const stats = PROJECT_STATS[card.id] || [];
   const accentColor = PROJECT_ACCENTS[card.id] || "#ffffff";
+  const accentName = PROJECT_ACCENT_NAMES[card.id] || "project accent";
+  const [introComplete, setIntroComplete] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const limitation = useMemo(() => findPhase(card, /LIMITA/i), [card]);
   const nextStep = useMemo(() => findPhase(card, /PROX/i), [card]);
+  const heroImage = showcase?.desktopSrc || card.imageUrl;
+  const originCenterX = originRect.left + originRect.width / 2;
+  const originCenterY = originRect.top + originRect.height / 2;
+  const introStyle = {
+    "--origin-left": `${originRect.left}px`,
+    "--origin-top": `${originRect.top}px`,
+    "--origin-width": `${originRect.width}px`,
+    "--origin-height": `${originRect.height}px`,
+    "--origin-center-x": `${originCenterX}px`,
+    "--origin-center-y": `${originCenterY}px`,
+    "--project-accent": accentColor,
+  } as CSSProperties;
+
+  const mediaItems = useMemo<MediaLightboxItem[]>(() => {
+    const items: MediaLightboxItem[] = [];
+
+    if (showcase?.desktopSrc) {
+      items.push({
+        src: showcase.desktopSrc,
+        title: `${card.projectName} - desktop`,
+        caption: "Tela principal em contexto de uso.",
+      });
+    }
+    if (showcase?.mobileSrc) {
+      items.push({
+        src: showcase.mobileSrc,
+        title: `${card.projectName} - mobile`,
+        caption: "Versao mobile usada para validar responsividade e fluxo.",
+      });
+    }
+    if (showcase?.adminSrc) {
+      items.push({
+        src: showcase.adminSrc,
+        title: showcase.adminTitle || `${card.projectName} - painel`,
+        caption: "Painel complementar do projeto.",
+      });
+    }
+
+    screenshots.forEach((src, index) => {
+      if (items.some((item) => item.src === src)) return;
+      items.push({
+        src,
+        title: `${card.projectName} - evidencia ${String(index + 1).padStart(2, "0")}`,
+        caption: "Print usado para sustentar a narrativa do case study.",
+      });
+    });
+
+    return items;
+  }, [card.projectName, screenshots, showcase]);
+
+  const openMediaBySrc = (src?: string) => {
+    if (!src) return;
+    const nextIndex = mediaItems.findIndex((item) => item.src === src);
+    if (nextIndex >= 0) setLightboxIndex(nextIndex);
+  };
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     modalRef.current?.scrollTo({ top: 0 });
-    closeButtonRef.current?.focus();
+    if (introComplete) closeButtonRef.current?.focus();
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onCloseRequest();
+      if (event.key === "Escape" && lightboxIndex === null) onCloseRequest();
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -278,7 +364,169 @@ export default function ProjectPresentationView({
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onCloseRequest]);
+  }, [introComplete, lightboxIndex, onCloseRequest]);
+
+  useEffect(() => {
+    const intro = introRef.current;
+    if (!intro) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      setIntroComplete(true);
+      return;
+    }
+
+    const video = tunnelVideoRef.current;
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.load();
+    }
+
+    const ctx = gsap.context(() => {
+      const q = gsap.utils.selector(intro);
+      const portal = q(".project-entry__portal");
+      const layers = q(".project-entry__layer");
+      const tunnel = q(".project-entry__tunnel");
+      const title = q(".project-entry__title");
+      const blackout = q(".project-entry__blackout");
+
+      gsap.set(portal, {
+        left: originRect.left,
+        top: originRect.top,
+        width: originRect.width,
+        height: originRect.height,
+        transformOrigin: "50% 50%",
+      });
+      gsap.set(layers, { x: 0, y: 0, z: 0, rotateX: 0, rotateY: 0, opacity: 1, filter: "blur(0px)" });
+      gsap.set(tunnel, {
+        autoAlpha: 0,
+        scale: 1,
+        filter: "blur(0px) brightness(1.06) contrast(1.12) saturate(1.12)",
+        transformOrigin: "50% 50%",
+      });
+      gsap.set(title, { autoAlpha: 0, y: 28, filter: "blur(10px)" });
+      gsap.set(blackout, { autoAlpha: 0 });
+
+      const timeline = gsap.timeline({
+        defaults: { ease: "power3.inOut" },
+        onComplete: () => {
+          setIntroComplete(true);
+          requestAnimationFrame(() => closeButtonRef.current?.focus());
+        },
+      });
+
+      timeline
+        .to(portal, {
+          left: "50vw",
+          top: "50vh",
+          xPercent: -50,
+          yPercent: -50,
+          width: "min(74vw, 980px)",
+          height: "min(58vh, 560px)",
+          borderRadius: 32,
+          duration: 0.9,
+          ease: "expo.out",
+        })
+        .to(portal, {
+          scale: 1.035,
+          duration: 0.34,
+          ease: "sine.inOut",
+        })
+        .to(layers, {
+          x: (index: number) => [0, -110, 112, -72, 74, 0][index] ?? 0,
+          y: (index: number) => [0, 58, -58, -92, 86, 0][index] ?? 0,
+          z: (index: number) => [0, 100, 150, 190, 220, 260][index] ?? 0,
+          rotateX: (index: number) => [0, 12, -10, 14, -12, 0][index] ?? 0,
+          rotateY: (index: number) => [0, -15, 14, -10, 11, 0][index] ?? 0,
+          scale: (index: number) => (index === 0 ? 1.08 : 0.96),
+          opacity: (index: number) => (index === 0 ? 0.92 : 0.82),
+          duration: 0.92,
+          stagger: 0.055,
+          ease: "power3.out",
+        }, "-=0.04")
+        .add("collapse", "-=0.2")
+        .to(layers, {
+          x: 0,
+          y: 0,
+          z: -360,
+          rotateX: 0,
+          rotateY: 0,
+          scale: 0.42,
+          opacity: 0,
+          filter: "blur(18px)",
+          duration: 0.88,
+          stagger: 0.035,
+          ease: "power3.in",
+        }, "collapse")
+        .to(portal, {
+          scale: 0.28,
+          opacity: 0,
+          filter: "blur(18px)",
+          duration: 0.78,
+          ease: "power3.in",
+        }, "collapse")
+        .to(tunnel, {
+          autoAlpha: 1,
+          scale: 1,
+          filter: "blur(0px) brightness(1.06) contrast(1.12) saturate(1.12)",
+          duration: 0.12,
+          ease: "power2.out",
+        }, "collapse+=0.48")
+        .call(() => {
+          if (!video) return;
+          video.pause();
+          video.currentTime = 0;
+          void video.play().catch(() => {});
+        }, undefined, "collapse+=0.5")
+        .to(tunnel, {
+          scale: 3.65,
+          filter: "brightness(1.02) contrast(1.2) saturate(1.16)",
+          duration: 5.4,
+          ease: "none",
+        }, "collapse+=0.5")
+        .to(blackout, { autoAlpha: 1, duration: 1.05, ease: "power2.in" }, "-=1.05")
+        .to(title, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.72, ease: "power3.out" }, "-=0.08")
+        .to(title, { autoAlpha: 1, duration: 0.72 })
+        .to(title, { autoAlpha: 0, y: -20, filter: "blur(8px)", duration: 0.42, ease: "power2.in" });
+    }, intro);
+
+    return () => ctx.revert();
+  }, [accentColor, card.projectName, originRect.height, originRect.left, originRect.top, originRect.width]);
+
+  useEffect(() => {
+    if (!introComplete || !modalRef.current) return;
+
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) return;
+
+    const ctx = gsap.context(() => {
+      const rebuildItems = gsap.utils.toArray<HTMLElement>(".project-case-rebuild", modalRef.current);
+      if (rebuildItems.length === 0) return;
+
+      gsap.fromTo(
+        rebuildItems,
+        {
+          autoAlpha: 0,
+          y: 28,
+          scale: 0.985,
+          filter: "blur(8px)",
+          transformOrigin: "50% 42%",
+        },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          filter: "blur(0px)",
+          duration: 0.82,
+          ease: "power3.out",
+          stagger: 0.06,
+        },
+      );
+    }, modalRef);
+
+    return () => ctx.revert();
+  }, [introComplete]);
 
   return (
     <motion.div
@@ -287,46 +535,79 @@ export default function ProjectPresentationView({
       role="dialog"
       aria-modal="true"
       aria-label={`Case study de ${card.projectName}`}
-      initial={{
-        clipPath: `circle(0% at ${originRect.left + originRect.width / 2}px ${originRect.top + originRect.height / 2}px)`,
-        filter: "blur(8px)",
-        opacity: 0,
-      }}
-      animate={{
-        clipPath: "circle(150% at 50% 50%)",
-        filter: "blur(0px)",
-        opacity: 1,
-      }}
-      exit={{
-        clipPath: `circle(0% at ${originRect.left + originRect.width / 2}px ${originRect.top + originRect.height / 2}px)`,
-        filter: "blur(8px)",
-        opacity: 0,
-      }}
-      transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: "blur(6px)" }}
+      transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
       className="fixed inset-0 z-50 overflow-y-auto bg-[#060608] text-white outline-none scrollbar-thin"
+      style={{ "--project-accent": accentColor } as CSSProperties}
     >
+      {!introComplete && (
+        <div ref={introRef} className="project-entry" style={introStyle} aria-hidden="true">
+          <div className="project-entry__ambient" />
+          <video
+            ref={tunnelVideoRef}
+            className="project-entry__tunnel"
+            muted
+            playsInline
+            preload="auto"
+            poster="/assets/videos/project-tunnel-poster.jpg"
+            src="/assets/videos/project-tunnel-transition.mp4"
+          />
+          <div className="project-entry__portal">
+            <div className="project-entry__layer project-entry__layer--back" />
+            <div className="project-entry__layer project-entry__layer--image">
+              <img src={heroImage} alt="" draggable={false} />
+            </div>
+            <div className="project-entry__layer project-entry__layer--blueprint">
+              <span />
+              <span />
+              <span />
+            </div>
+            <div className="project-entry__layer project-entry__layer--top">
+              <span>{card.category}</span>
+              <strong>{card.projectName}</strong>
+            </div>
+            <div className="project-entry__layer project-entry__layer--chip project-entry__layer--chip-a">
+              {accentName}
+            </div>
+            <div className="project-entry__layer project-entry__layer--chip project-entry__layer--chip-b">
+              case study
+            </div>
+          </div>
+          <div className="project-entry__blackout" />
+          <div className="project-entry__title">
+            <span>{card.category}</span>
+            <h2>{card.projectName}</h2>
+          </div>
+        </div>
+      )}
+
       <button
         ref={closeButtonRef}
         type="button"
         onClick={onCloseRequest}
-        className="fixed right-5 top-5 z-50 grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-black/70 text-white/80 backdrop-blur transition hover:scale-105 hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+        className={`fixed right-5 top-5 z-50 grid h-12 w-12 place-items-center rounded-full border border-white/10 bg-black/70 text-white/80 backdrop-blur transition hover:scale-105 hover:bg-white hover:text-black focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+          introComplete ? "opacity-100" : "pointer-events-none opacity-0"
+        }`}
         aria-label={`Fechar case study de ${card.projectName}`}
       >
         <X size={20} />
       </button>
 
-      <section className="relative min-h-[86vh] overflow-hidden border-b border-white/[0.06] px-6 pb-16 pt-28 md:px-12 md:pb-20 md:pt-36">
-        {videoSrc ? (
-          <video autoPlay loop muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-35">
-            <source src={videoSrc} type="video/mp4" />
-          </video>
-        ) : (
-          <ProjectBackgroundCanvas projectId={card.id} />
-        )}
+      <section className="project-case-rebuild project-case-hero relative min-h-[86vh] overflow-hidden border-b border-white/[0.06] px-6 pb-16 pt-28 md:px-12 md:pb-20 md:pt-36">
+        <ProjectBackgroundCanvas projectId={card.id} />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_65%_28%,rgba(255,255,255,0.12),transparent_28%),linear-gradient(180deg,rgba(0,0,0,0.35),#060608_88%)]" />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px"
+          style={{ background: `linear-gradient(90deg, transparent, ${accentColor}, transparent)` }}
+        />
 
         <div className="relative mx-auto flex min-h-[62vh] w-full max-w-6xl flex-col justify-end">
-          <span className="mb-5 inline-flex w-fit rounded-full border border-white/15 bg-black/45 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65 backdrop-blur">
+          <span
+            className="mb-5 inline-flex w-fit rounded-full border bg-black/45 px-4 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/65 backdrop-blur"
+            style={{ borderColor: `${accentColor}66` }}
+          >
             {card.category}
           </span>
           <h1 className="max-w-4xl font-serif text-5xl font-light uppercase leading-[0.95] tracking-wide text-white md:text-8xl">
@@ -338,7 +619,7 @@ export default function ProjectPresentationView({
         </div>
       </section>
 
-      <main className="mx-auto w-full max-w-6xl px-6 py-16 md:px-12 md:py-24">
+      <main className="project-case-rebuild mx-auto w-full max-w-6xl px-6 py-16 md:px-12 md:py-24">
         <section className="grid gap-6 md:grid-cols-3">
           <article className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-6 md:col-span-2">
             <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-white/35">Resumo honesto</span>
@@ -417,14 +698,32 @@ export default function ProjectPresentationView({
             <div className="mt-10 grid gap-6 md:grid-cols-12 md:items-center">
               {showcase.hasDesktop && (
                 <figure className={`${showcase.hasMobile ? "md:col-span-8" : "md:col-span-12"} overflow-hidden rounded-xl border border-white/[0.08] bg-black p-2`}>
-                  <img src={showcase.desktopSrc} alt={`${card.projectName} desktop`} className="aspect-video w-full rounded-lg object-cover" loading="lazy" />
+                  <button
+                    type="button"
+                    onClick={() => openMediaBySrc(showcase.desktopSrc)}
+                    className="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    aria-label={`Ampliar tela desktop de ${card.projectName}`}
+                  >
+                    <img src={showcase.desktopSrc} alt={`${card.projectName} desktop`} className="aspect-video w-full rounded-lg object-cover transition duration-500 group-hover:scale-[1.015]" loading="lazy" />
+                    <span className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-black/60 text-white/75 backdrop-blur transition group-hover:bg-white group-hover:text-black">
+                      <Maximize2 size={15} />
+                    </span>
+                  </button>
                 </figure>
               )}
               {showcase.hasMobile && (
                 <figure className="mx-auto w-[230px] rounded-[32px] border-[4px] border-white/10 bg-black p-2 md:col-span-4">
-                  <div className="overflow-hidden rounded-[25px] border border-black bg-neutral-900 aspect-[9/19]">
-                    <img src={showcase.mobileSrc} alt={`${card.projectName} mobile`} className="h-full w-full object-cover" loading="lazy" />
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => openMediaBySrc(showcase.mobileSrc)}
+                    className="group relative block aspect-[9/19] w-full cursor-zoom-in overflow-hidden rounded-[25px] border border-black bg-neutral-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                    aria-label={`Ampliar tela mobile de ${card.projectName}`}
+                  >
+                    <img src={showcase.mobileSrc} alt={`${card.projectName} mobile`} className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.025]" loading="lazy" />
+                    <span className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-black/60 text-white/75 backdrop-blur transition group-hover:bg-white group-hover:text-black">
+                      <Maximize2 size={14} />
+                    </span>
+                  </button>
                 </figure>
               )}
             </div>
@@ -434,7 +733,17 @@ export default function ProjectPresentationView({
                 <figcaption className="px-2 pb-3 pt-1 text-sm font-light uppercase tracking-[0.18em] text-white/45">
                   {showcase.adminTitle}
                 </figcaption>
-                <img src={showcase.adminSrc} alt={`${card.projectName} painel administrativo`} className="aspect-video w-full rounded-lg object-cover" loading="lazy" />
+                <button
+                  type="button"
+                  onClick={() => openMediaBySrc(showcase.adminSrc)}
+                  className="group relative block w-full cursor-zoom-in overflow-hidden rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                  aria-label={`Ampliar painel administrativo de ${card.projectName}`}
+                >
+                  <img src={showcase.adminSrc} alt={`${card.projectName} painel administrativo`} className="aspect-video w-full rounded-lg object-cover transition duration-500 group-hover:scale-[1.015]" loading="lazy" />
+                  <span className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-white/10 bg-black/60 text-white/75 backdrop-blur transition group-hover:bg-white group-hover:text-black">
+                    <Maximize2 size={15} />
+                  </span>
+                </button>
               </figure>
             )}
           </section>
@@ -448,7 +757,13 @@ export default function ProjectPresentationView({
             </h2>
             <div className="mt-10 grid gap-5 md:grid-cols-2">
               {screenshots.map((src, index) => (
-                <EvidenceImage key={`${src}-${index}`} src={src} title={card.projectName} index={index} />
+                <EvidenceImage
+                  key={`${src}-${index}`}
+                  src={src}
+                  title={card.projectName}
+                  index={index}
+                  onOpen={() => openMediaBySrc(src)}
+                />
               ))}
             </div>
           </section>
@@ -499,6 +814,16 @@ export default function ProjectPresentationView({
           </div>
         </section>
       </main>
+
+      {lightboxIndex !== null && mediaItems[lightboxIndex] && (
+        <MediaLightbox
+          items={mediaItems}
+          currentIndex={lightboxIndex}
+          accentColor={accentColor}
+          onIndexChange={setLightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+        />
+      )}
     </motion.div>
   );
 }
