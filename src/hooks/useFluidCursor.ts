@@ -460,8 +460,9 @@ const useFluidCursor = (
      
              float a = max(c.r, max(c.g, c.b));
              if (uIsLight > 0.5) {
-                 a = clamp(a * 0.8, 0.0, 1.0);
-                 gl_FragColor = vec4(c * 0.5, a);
+                 vec3 lightColor = mix(vec3(0.92, 0.92, 0.94), c * 1.5, 0.25);
+                 float opacity = clamp(a * 0.35, 0.0, 0.22);
+                 gl_FragColor = vec4(lightColor * opacity, opacity);
              } else {
                  gl_FragColor = vec4(c, a);
              }
