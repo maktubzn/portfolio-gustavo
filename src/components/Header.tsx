@@ -16,8 +16,8 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
 
   const menuItems = [
     { label: "Sobre", targetId: "about" },
-    { label: "Projetos", targetId: "portfolio" },
     { label: "QA Lab", targetId: "benefits" },
+    { label: "Projetos", targetId: "portfolio" },
     { label: "Contato", targetId: "footer" },
   ];
 
