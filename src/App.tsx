@@ -482,8 +482,8 @@ export default function App() {
       {/* Decoupled custom pointer mouse handler (disabled on touch devices) */}
       {!isAboutActive && !showLoader && <CustomCursor />}
 
-      {/* Fluid WebGL Smoke Trail Cursor (active only over portfolio or inside presentation or hero) */}
-      <FluidCursor isActive={isHoveringHero || isHoveringPortfolio || isPresentationActive} />
+      {/* Fluid WebGL Smoke Trail Cursor (active only over hero or inside presentation modal) */}
+      <FluidCursor isActive={isHoveringHero || isPresentationActive} theme="dark" />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { CheckCircle2, FileSearch, Gauge, TerminalSquare } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import FluidCursor from "./ui/FluidCursor";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -85,6 +86,7 @@ export default function QaLabImmersiveTransition() {
   const sectionRef = useRef<HTMLElement>(null);
   const [reducedMotion, setReducedMotion] = useState(getInitialReducedMotion);
   const [compactViewport, setCompactViewport] = useState(getInitialCompactViewport);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -199,9 +201,17 @@ export default function QaLabImmersiveTransition() {
   );
 
   return (
-    <section ref={sectionRef} id="benefits" className="qa-immersive" aria-label="QA Lab">
+    <section 
+      ref={sectionRef} 
+      id="benefits" 
+      className="qa-immersive" 
+      aria-label="QA Lab"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="qa-immersive__stage">
         <div className="qa-immersive__light-wash" aria-hidden="true" />
+        <FluidCursor isActive={isHovered} theme="light" className="absolute inset-0 z-[2] w-full h-full" />
 
         <div className="qa-immersive__intro" aria-hidden="true">
           <span>QA Lab</span>

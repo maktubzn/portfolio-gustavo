@@ -9,6 +9,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { CARDS_DATA } from "../data";
+import FluidCursor from "./ui/FluidCursor";
 import { CardData, CardViewportRect } from "../types";
 import ImageLightbox from "./ImageLightbox";
 import FlipWords from "./ui/FlipWords";
@@ -123,6 +124,7 @@ function DevicePreview({ item }: { item: PortfolioItem }) {
 
 export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProps) {
   const [lightboxItem, setLightboxItem] = useState<PortfolioItem | null>(null);
+  const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const squareRef = useRef<HTMLSpanElement>(null);
   const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
@@ -318,8 +320,11 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
     <section
       ref={containerRef}
       id="portfolio"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="portfolio-light light-showcase relative z-10 flex flex-col items-center border-t border-white/5 bg-black py-24 text-white md:py-36"
     >
+      <FluidCursor isActive={isHovered} theme="light" className="absolute inset-0 z-0 w-full h-full" />
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="relative mb-16 flex items-end justify-between gap-8 md:mb-24">
           <motion.div style={{ x: smoothX, y: smoothY }}>

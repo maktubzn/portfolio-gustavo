@@ -1,7 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, RefObject } from "react";
+import { useEffect, RefObject, useRef } from "react";
 
-const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
+const useFluidCursor = (
+  canvasRef: RefObject<HTMLCanvasElement | null>,
+  isActive: boolean = true,
+  theme: "light" | "dark" = "dark"
+) => {
+  const isActiveRef = useRef(isActive);
+  const themeRef = useRef(theme);
+
+  useEffect(() => {
+    isActiveRef.current = isActive;
+  }, [isActive]);
+
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -417,6 +432,7 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
          uniform sampler2D uDithering;
          uniform vec2 ditherScale;
          uniform vec2 texelSize;
+         uniform float uIsLight;
      
          vec3 linearToGamma (vec3 color) {
              color = max(color, vec3(0));
@@ -443,9 +459,14 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
          #endif
      
              float a = max(c.r, max(c.g, c.b));
-             gl_FragColor = vec4(c, a);
+             if (uIsLight > 0.5) {
+                 a = clamp(a * 3.0, 0.0, 1.0);
+                 gl_FragColor = vec4(c * 0.35, a);
+             } else {
+                 gl_FragColor = vec4(c, a);
+             }
          }
-     `;
+      `;
 
     const splatShader = compileShader(
       gl.FRAGMENT_SHADER,
@@ -958,11 +979,25 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     }
 
     function generateColor(): { r: number; g: number; b: number } {
-      const c = HSVtoRGB(Math.random(), 1.0, 1.0);
-      c.r *= 0.15;
-      c.g *= 0.15;
-      c.b *= 0.15;
-      return c;
+      if (themeRef.current === "light") {
+        const rand = Math.random();
+        if (rand < 0.33) {
+          // Dark Violet (e.g. RGB around 0.25, 0.12, 0.4)
+          return { r: 0.25, g: 0.12, b: 0.4 };
+        } else if (rand < 0.66) {
+          // Dark Blue (e.g. RGB around 0.12, 0.2, 0.45)
+          return { r: 0.12, g: 0.2, b: 0.45 };
+        } else {
+          // Dark Gray (e.g. RGB around 0.25, 0.25, 0.25)
+          return { r: 0.25, g: 0.25, b: 0.25 };
+        }
+      } else {
+        const c = HSVtoRGB(Math.random(), 1.0, 1.0);
+        c.r *= 0.15;
+        c.g *= 0.15;
+        c.b *= 0.15;
+        return c;
+      }
     }
 
     function HSVtoRGB(h: number, s: number, v: number) {
@@ -1267,6 +1302,7 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
           1.0 / height
         );
       gl.uniform1i(displayMaterial.uniforms.uTexture, dye.read.attach(0));
+      gl.uniform1f(displayMaterial.uniforms.uIsLight, themeRef.current === "light" ? 1.0 : 0.0);
       blit(target);
     }
 
@@ -1285,7 +1321,21 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
       return dt;
     }
 
+    let fadeFrames = 60;
+
     function update() {
+      const active = isActiveRef.current;
+      if (active) {
+        fadeFrames = 60;
+      } else {
+        fadeFrames--;
+      }
+
+      if (fadeFrames <= 0) {
+        animationFrameId = requestAnimationFrame(update);
+        return;
+      }
+
       if (config.PAUSED) {
         animationFrameId = requestAnimationFrame(update);
         return;
@@ -1294,7 +1344,11 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
       const dt = calcDeltaTime();
       if (resizeCanvas()) initFramebuffers();
       updateColors(dt);
-      applyInputs();
+      
+      if (active) {
+        applyInputs();
+      }
+      
       step(dt);
       render(null);
       animationFrameId = requestAnimationFrame(update);
@@ -1320,45 +1374,51 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     };
 
     const handleMouseDown = (e: MouseEvent) => {
+      if (!isActiveRef.current) return;
       const pointer = pointers[0];
-      const posX = scaleByPixelRatio(e.clientX);
-      const posY = scaleByPixelRatio(e.clientY);
+      const rect = canvasElement.getBoundingClientRect();
+      const posX = scaleByPixelRatio(e.clientX - rect.left);
+      const posY = scaleByPixelRatio(e.clientY - rect.top);
       checkHoveredColor(e);
       updatePointerDownData(pointer, -1, posX, posY);
       clickSplat(pointer);
     };
 
     const handleFirstMouseMove = (e: MouseEvent) => {
+      if (!isActiveRef.current) return;
       const pointer = pointers[0];
-      const posX = scaleByPixelRatio(e.clientX);
-      const posY = scaleByPixelRatio(e.clientY);
+      const rect = canvasElement.getBoundingClientRect();
+      const posX = scaleByPixelRatio(e.clientX - rect.left);
+      const posY = scaleByPixelRatio(e.clientY - rect.top);
       checkHoveredColor(e);
 
-      update();
       updatePointerMoveData(pointer, posX, posY, pointer.color);
 
       document.body.removeEventListener("mousemove", handleFirstMouseMove);
     };
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (!isActiveRef.current) return;
       const pointer = pointers[0];
-      const posX = scaleByPixelRatio(e.clientX);
-      const posY = scaleByPixelRatio(e.clientY);
+      const rect = canvasElement.getBoundingClientRect();
+      const posX = scaleByPixelRatio(e.clientX - rect.left);
+      const posY = scaleByPixelRatio(e.clientY - rect.top);
       checkHoveredColor(e);
 
       updatePointerMoveData(pointer, posX, posY, pointer.color);
     };
 
     const handleFirstTouchStart = (e: TouchEvent) => {
+      if (!isActiveRef.current) return;
       const touches = e.targetTouches;
       const pointer = pointers[0];
 
       if (touches.length > 0) {
-        const posX = scaleByPixelRatio(touches[0].clientX);
-        const posY = scaleByPixelRatio(touches[0].clientY);
+        const rect = canvasElement.getBoundingClientRect();
+        const posX = scaleByPixelRatio(touches[0].clientX - rect.left);
+        const posY = scaleByPixelRatio(touches[0].clientY - rect.top);
         checkHoveredColor(e);
 
-        update();
         updatePointerDownData(pointer, touches[0].identifier, posX, posY);
       }
 
@@ -1366,22 +1426,26 @@ const useFluidCursor = (canvasRef: RefObject<HTMLCanvasElement | null>) => {
     };
 
     const handleTouchStart = (e: TouchEvent) => {
+      if (!isActiveRef.current) return;
       const touches = e.targetTouches;
       const pointer = pointers[0];
       if (touches.length > 0) {
-        const posX = scaleByPixelRatio(touches[0].clientX);
-        const posY = scaleByPixelRatio(touches[0].clientY);
+        const rect = canvasElement.getBoundingClientRect();
+        const posX = scaleByPixelRatio(touches[0].clientX - rect.left);
+        const posY = scaleByPixelRatio(touches[0].clientY - rect.top);
         checkHoveredColor(e);
         updatePointerDownData(pointer, touches[0].identifier, posX, posY);
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (!isActiveRef.current) return;
       const touches = e.targetTouches;
       const pointer = pointers[0];
       if (touches.length > 0) {
-        const posX = scaleByPixelRatio(touches[0].clientX);
-        const posY = scaleByPixelRatio(touches[0].clientY);
+        const rect = canvasElement.getBoundingClientRect();
+        const posX = scaleByPixelRatio(touches[0].clientX - rect.left);
+        const posY = scaleByPixelRatio(touches[0].clientY - rect.top);
         checkHoveredColor(e);
         updatePointerMoveData(pointer, posX, posY, pointer.color);
       }
