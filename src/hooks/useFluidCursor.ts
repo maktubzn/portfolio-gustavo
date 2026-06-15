@@ -460,8 +460,8 @@ const useFluidCursor = (
      
              float a = max(c.r, max(c.g, c.b));
              if (uIsLight > 0.5) {
-                 a = clamp(a * 3.0, 0.0, 1.0);
-                 gl_FragColor = vec4(c * 0.35, a);
+                 a = clamp(a * 0.8, 0.0, 1.0);
+                 gl_FragColor = vec4(c * 0.5, a);
              } else {
                  gl_FragColor = vec4(c, a);
              }
@@ -982,14 +982,14 @@ const useFluidCursor = (
       if (themeRef.current === "light") {
         const rand = Math.random();
         if (rand < 0.33) {
-          // Dark Violet (e.g. RGB around 0.25, 0.12, 0.4)
-          return { r: 0.25, g: 0.12, b: 0.4 };
+          // Pastel Violet-Gray
+          return { r: 0.45, g: 0.38, b: 0.5 };
         } else if (rand < 0.66) {
-          // Dark Blue (e.g. RGB around 0.12, 0.2, 0.45)
-          return { r: 0.12, g: 0.2, b: 0.45 };
+          // Pastel Blue-Gray
+          return { r: 0.38, g: 0.45, b: 0.5 };
         } else {
-          // Dark Gray (e.g. RGB around 0.25, 0.25, 0.25)
-          return { r: 0.25, g: 0.25, b: 0.25 };
+          // Pastel Gray
+          return { r: 0.42, g: 0.42, b: 0.42 };
         }
       } else {
         const c = HSVtoRGB(Math.random(), 1.0, 1.0);
