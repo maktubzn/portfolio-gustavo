@@ -400,9 +400,9 @@ export default function App() {
             className="w-full max-w-4xl mx-auto px-6 text-center select-none flex flex-col items-center mt-0 md:mt-2"
           >
             {/* Main big serif title */}
-            <h1 className="font-serif text-white font-light text-[38px] sm:text-[48px] md:text-[62px] leading-[1.10] md:leading-[1.15] tracking-normal max-w-3xl antialiased">
+            <h1 className="hero-title font-serif text-white font-light text-[38px] sm:text-[48px] md:text-[62px] leading-[1.10] md:leading-[1.15] tracking-normal max-w-3xl antialiased">
               {HERO_CONTENT.titleLines.map((line, index) => (
-                <span key={line}>
+                <span key={line} className={`hero-title__line hero-title__line--${index + 1}`}>
                   {line}
                   {index < HERO_CONTENT.titleLines.length - 1 && (
                     <>

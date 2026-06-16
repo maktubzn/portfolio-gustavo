@@ -341,7 +341,7 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
               className="portfolio-title font-serif text-5xl uppercase tracking-wide text-white md:text-7xl flex flex-wrap items-center gap-x-3 gap-y-1"
               aria-label="Projetos selecionados"
             >
-              <span>
+              <span className="portfolio-title__word">
                 {"Projet".split("").map((char, index) => (
                   <span key={`p-${index}`} className="inline-block overflow-hidden align-bottom">
                     <span className="portfolio-char-inner inline-block will-change-transform">{char}</span>
@@ -357,7 +357,7 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
               </span>
               <FlipWords 
                 words={["reais", "completos", "imersivos", "solo"]} 
-                className="text-white text-3xl sm:text-4xl md:text-5xl font-sans font-light lowercase tracking-normal bg-white/5 px-4 py-1 rounded-md border border-white/5 inline-block align-middle" 
+                className="portfolio-title__flip text-white text-3xl sm:text-4xl md:text-5xl lowercase tracking-normal bg-white/5 px-4 py-1 rounded-md border border-white/5 inline-block align-middle" 
               />
             </h2>
           </motion.div>
