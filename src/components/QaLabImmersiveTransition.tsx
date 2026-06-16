@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { CheckCircle2, FileSearch, Gauge, TerminalSquare } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import FluidCursor from "./ui/FluidCursor";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const FluidCursor = lazy(() => import("./ui/FluidCursor"));
 
 const DECORATIVE_SCREENS = [
   {
@@ -211,7 +212,11 @@ export default function QaLabImmersiveTransition() {
     >
       <div className="qa-immersive__stage">
         <div className="qa-immersive__light-wash" aria-hidden="true" />
-        <FluidCursor isActive={isHovered} theme="light" className="absolute inset-0 z-[2] w-full h-full" />
+        {isHovered && (
+          <Suspense fallback={null}>
+            <FluidCursor isActive theme="light" className="absolute inset-0 z-[2] w-full h-full" />
+          </Suspense>
+        )}
 
         <div className="qa-immersive__intro" aria-hidden="true">
           <span>QA Lab</span>

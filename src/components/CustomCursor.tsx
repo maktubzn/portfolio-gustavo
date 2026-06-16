@@ -6,7 +6,6 @@
 import { useEffect, useState, useRef } from "react";
 
 export default function CustomCursor() {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -14,6 +13,7 @@ export default function CustomCursor() {
   // Refs for tracking position and lerped motion
   const mouseRef = useRef({ x: 0, y: 0 });
   const cursorRef = useRef({ x: 0, y: 0 });
+  const cursorElementRef = useRef<HTMLDivElement>(null);
   const requestRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -73,7 +73,9 @@ export default function CustomCursor() {
       const nextY = currentY + (targetY - currentY) * 0.14;
 
       cursorRef.current = { x: nextX, y: nextY };
-      setPosition({ x: nextX, y: nextY });
+      if (cursorElementRef.current) {
+        cursorElementRef.current.style.transform = `translate3d(${nextX}px, ${nextY}px, 0) translate3d(-50%, -50%, 0)`;
+      }
 
       requestRef.current = requestAnimationFrame(updateCursor);
     };
@@ -98,9 +100,8 @@ export default function CustomCursor() {
 
   return (
     <div
-      style={{
-        transform: `translate3d(${position.x}px, ${position.y}px, 0) translate3d(-50%, -50%, 0)`,
-      }}
+      ref={cursorElementRef}
+      style={{ transform: "translate3d(0, 0, 0) translate3d(-50%, -50%, 0)" }}
       className={`fixed top-0 left-0 pointer-events-none z-50 flex items-center justify-center rounded-full transition-transform-width duration-300 ease-out transition-cursor ${
         isHovered
           ? "w-14 h-14 bg-white text-black text-[9px] font-sans font-medium uppercase tracking-[0.15em] shadow-[0_0_15px_rgba(255,255,255,0.7)]"

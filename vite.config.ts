@@ -26,6 +26,7 @@ export default defineConfig(() => {
             if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
             if (id.includes('gsap') || id.includes('@gsap')) return 'vendor-gsap';
             if (id.includes('motion')) return 'vendor-motion';
+            if (id.includes('three')) return 'vendor-three';
             if (id.includes('lenis') || id.includes('lucide-react')) return 'vendor-ui';
             return 'vendor';
           },

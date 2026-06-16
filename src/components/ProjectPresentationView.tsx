@@ -380,7 +380,6 @@ export default function ProjectPresentationView({
     if (video) {
       video.pause();
       video.currentTime = 0;
-      video.load();
     }
 
     const ctx = gsap.context(() => {
@@ -550,7 +549,7 @@ export default function ProjectPresentationView({
             className="project-entry__tunnel"
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             poster="/assets/videos/project-tunnel-poster.jpg"
             src="/assets/videos/project-tunnel-transition.mp4"
           />

@@ -15,7 +15,7 @@
  *   - handlePageScroll: gerencia opacidade do Hero e esconde o header ao entrar em #about.
  */
 
-import { useState, useEffect, useRef, useMemo, type MouseEvent } from "react";
+import { Suspense, lazy, useState, useEffect, useRef, useMemo, type MouseEvent } from "react";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useReducedMotion, useTransform } from "motion/react";
 import gsap from "gsap";
@@ -24,9 +24,6 @@ import "lenis/dist/lenis.css";
 import Header from "./components/Header";
 import CustomCursor from "./components/CustomCursor";
 import ThreeDCarousel from "./components/ThreeDCarousel";
-import ExpandedModal from "./components/ExpandedModal";
-import ProjectPresentationView from "./components/ProjectPresentationView";
-import FluidCursor from "./components/ui/FluidCursor";
 import Personagem from "./components/Personagem";
 import AboutSection from "./components/AboutSection";
 import QaLabImmersiveTransition from "./components/QaLabImmersiveTransition";
@@ -37,10 +34,14 @@ import VideoNarrativeSection from "./components/VideoNarrativeSection";
 import LoadingScreen from "./components/LoadingScreen";
 import { usePortfolioLoader } from "./hooks/usePortfolioLoader";
 import { useLenis } from "./hooks/useLenis";
-import { CARDS_DATA, HERO_CONTENT, ABOUT_CONTENT } from "./data";
+import { CARDS_DATA, HERO_CONTENT } from "./data";
 import { CardTransitionPhase, CardViewportRect } from "./types";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const ExpandedModal = lazy(() => import("./components/ExpandedModal"));
+const ProjectPresentationView = lazy(() => import("./components/ProjectPresentationView"));
+const FluidCursor = lazy(() => import("./components/ui/FluidCursor"));
 
 export default function App() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
@@ -65,9 +66,8 @@ export default function App() {
   // 1. Loading Screen & Asset Loading Setup
   const [showLoader, setShowLoader] = useState(true);
   
-  // Only preload fonts + card/hero images (NOT the 240 About frames)
+  // Only preload local card images. Remote portrait/video assets load on demand.
   const imageUrls = useMemo(() => [
-    ABOUT_CONTENT.portraitUrl,
     ...CARDS_DATA.map((c) => c.imageUrl)
   ], []);
 
@@ -176,32 +176,6 @@ export default function App() {
     const blurDistance = window.innerHeight * 0.7;
     const next = Math.min(1, Math.max(0, (scrollTop - blurStart) / blurDistance));
     heroExitProgress.set(next);
-    
-    const aboutEl = document.getElementById("about");
-    if (aboutEl) {
-      const parent = aboutEl.parentElement;
-      const measuredEl = parent && parent.classList.contains("pin-spacer") ? parent : aboutEl;
-      const rect = measuredEl.getBoundingClientRect();
-      setIsAboutActive(rect.top < window.innerHeight * 0.16 && rect.bottom > window.innerHeight * 0.22);
-    }
-
-    const benefitsEl = document.getElementById("benefits");
-    let benefitsLightActive = false;
-    if (benefitsEl) {
-      const parent = benefitsEl.parentElement;
-      const measuredEl = parent && parent.classList.contains("pin-spacer") ? parent : benefitsEl;
-      const rect = measuredEl.getBoundingClientRect();
-      const progress = Math.min(1, Math.max(0, (window.innerHeight * 0.42 - rect.top) / Math.max(1, rect.height)));
-      benefitsLightActive = rect.top < window.innerHeight * 0.42 && rect.bottom > window.innerHeight * 0.18 && progress > 0.42;
-    }
-
-    const lightZoneActive = benefitsLightActive || ["portfolio", "services"].some((id) => {
-      const el = document.getElementById(id);
-      if (!el) return false;
-      const rect = el.getBoundingClientRect();
-      return rect.top < window.innerHeight * 0.42 && rect.bottom > window.innerHeight * 0.18;
-    });
-    setIsLightZoneActive(lightZoneActive);
   };
 
   useEffect(() => {
@@ -210,6 +184,56 @@ export default function App() {
 
     window.addEventListener("scroll", handlePageScroll, { passive: true });
     return () => window.removeEventListener("scroll", handlePageScroll);
+  }, [showLoader]);
+
+  useEffect(() => {
+    if (showLoader) return;
+
+    const aboutEl = document.getElementById("about");
+    const lightZoneIds = ["benefits", "portfolio", "services"];
+    const activeLightZones = new Set<string>();
+
+    const aboutObserver = aboutEl
+      ? new IntersectionObserver(
+          ([entry]) => setIsAboutActive(entry.isIntersecting),
+          {
+            root: null,
+            rootMargin: "-16% 0px -78% 0px",
+            threshold: 0,
+          }
+        )
+      : null;
+
+    if (aboutEl && aboutObserver) aboutObserver.observe(aboutEl);
+
+    const lightObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const id = (entry.target as HTMLElement).id;
+          if (entry.isIntersecting) {
+            activeLightZones.add(id);
+          } else {
+            activeLightZones.delete(id);
+          }
+        });
+        setIsLightZoneActive(activeLightZones.size > 0);
+      },
+      {
+        root: null,
+        rootMargin: "-42% 0px -58% 0px",
+        threshold: 0,
+      }
+    );
+
+    lightZoneIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) lightObserver.observe(el);
+    });
+
+    return () => {
+      aboutObserver?.disconnect();
+      lightObserver.disconnect();
+    };
   }, [showLoader]);
 
   const handleCardSelect = (cardId: number, rect: CardViewportRect) => {
@@ -459,31 +483,37 @@ export default function App() {
           }
         }}
       >
-        {activeCard && originRect && isModalActive && (
-          <ExpandedModal
-            card={activeCard}
-            originRect={originRect}
-            phase={transitionPhase}
-            onOpenComplete={() => setTransitionPhase("open")}
-            onCloseRequest={() => setTransitionPhase("closing")}
-            onCloseComplete={handleModalCloseComplete}
-          />
-        )}
+        <Suspense fallback={null}>
+          {activeCard && originRect && isModalActive && (
+            <ExpandedModal
+              card={activeCard}
+              originRect={originRect}
+              phase={transitionPhase}
+              onOpenComplete={() => setTransitionPhase("open")}
+              onCloseRequest={() => setTransitionPhase("closing")}
+              onCloseComplete={handleModalCloseComplete}
+            />
+          )}
 
-        {activeCard && originRect && isPresentationActive && (
-          <ProjectPresentationView
-            card={activeCard}
-            originRect={originRect}
-            onCloseRequest={handleModalCloseComplete}
-          />
-        )}
+          {activeCard && originRect && isPresentationActive && (
+            <ProjectPresentationView
+              card={activeCard}
+              originRect={originRect}
+              onCloseRequest={handleModalCloseComplete}
+            />
+          )}
+        </Suspense>
       </AnimatePresence>
 
       {/* Decoupled custom pointer mouse handler (disabled on touch devices) */}
       {!isAboutActive && !showLoader && <CustomCursor />}
 
       {/* Fluid WebGL Smoke Trail Cursor (active only over hero or inside presentation modal) */}
-      <FluidCursor isActive={isHoveringHero || isPresentationActive} theme="dark" />
+      {(isHoveringHero || isPresentationActive) && (
+        <Suspense fallback={null}>
+          <FluidCursor isActive theme="dark" />
+        </Suspense>
+      )}
     </div>
   );
 }

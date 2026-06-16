@@ -18,6 +18,10 @@ const useFluidCursor = (
   }, [theme]);
 
   useEffect(() => {
+    const finePointer = window.matchMedia("(pointer: fine)").matches;
+    const allowsMotion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+    if (!isActive || !finePointer || !allowsMotion) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -1479,7 +1483,7 @@ const useFluidCursor = (
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [canvasRef]);
+  }, [canvasRef, isActive, theme]);
 };
 
 export default useFluidCursor;

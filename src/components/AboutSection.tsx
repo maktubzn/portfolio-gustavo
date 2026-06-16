@@ -83,6 +83,7 @@ export default function AboutSection() {
 
   const [videoDuration, setVideoDuration] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
   const [compactViewport, setCompactViewport] = useState(getInitialCompactViewport);
 
   // Monitor viewport adjustments
@@ -98,8 +99,28 @@ export default function AboutSection() {
     };
   }, []);
 
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section || shouldLoadVideo) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadVideo(true);
+          observer.disconnect();
+        }
+      },
+      { root: null, rootMargin: "900px 0px", threshold: 0 }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [shouldLoadVideo]);
+
   // Monitor and extract video duration on loadedmetadata
   useEffect(() => {
+    if (!shouldLoadVideo) return;
+
     const video = videoRef.current;
     if (!video) return;
 
@@ -121,13 +142,10 @@ export default function AboutSection() {
       video.addEventListener("loadedmetadata", handleLoadedMetadata);
     }
 
-    // Force load immediately on mount to make metadata/duration available instantly
-    video.load();
-
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
-  }, []);
+  }, [shouldLoadVideo]);
 
   // GSAP ScrollTrigger timeline configuration
   useGSAP(
@@ -282,11 +300,11 @@ export default function AboutSection() {
     >
       <video
         ref={videoRef}
-        src={VIDEO_SRC}
+        src={shouldLoadVideo ? VIDEO_SRC : undefined}
         className="cinematic-about__video"
         muted
         playsInline
-        preload="auto"
+        preload="metadata"
         style={{ willChange: "transform" }}
         aria-hidden="true"
       />

@@ -1,8 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:opsz,wght@14..32,300..900&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -24,6 +22,7 @@ html, body {
   width: 100%;
   user-select: none;
   -webkit-user-select: none;
+  overflow-wrap: anywhere;
 }
 
 html.lenis,
@@ -781,7 +780,7 @@ html.lenis body {
 
 @theme inline {
   --font-heading: var(--font-sans);
-  --font-sans: 'Geist Variable', sans-serif;
+  --font-sans: "Inter", system-ui, sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -1481,6 +1480,16 @@ html.lenis body {
 
   .qa-immersive__card p {
     font-size: 0.78rem;
+  }
+}
+
+@media (max-width: 380px) {
+  .qa-immersive__cards {
+    grid-template-columns: 1fr;
+  }
+
+  .qa-immersive__card {
+    min-height: auto;
   }
 }
 

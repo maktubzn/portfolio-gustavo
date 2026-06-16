@@ -82,6 +82,7 @@ export default function ExpandedModal({
 
   const animatedRect = phase === "closing" ? originRect : targetRect;
   const isOpen = phase === "open";
+  const canRequestClose = phase !== "closing";
   const shellTransition = shouldReduceMotion
     ? { duration: 0.12 }
     : phase === "closing"
@@ -108,7 +109,7 @@ export default function ExpandedModal({
         type="button"
         aria-label="Fechar detalhes"
         onClick={() => {
-          if (phase === "open") onCloseRequest();
+          if (canRequestClose) onCloseRequest();
         }}
         className="absolute inset-0 bg-black/95 backdrop-blur-md"
         initial={{ opacity: 0 }}
@@ -165,6 +166,7 @@ export default function ExpandedModal({
                 loop
                 muted
                 playsInline
+                preload="metadata"
                 className="h-full w-full object-cover select-none opacity-50"
               >
                 <source src={videoSrc} type="video/mp4" />
@@ -193,7 +195,7 @@ export default function ExpandedModal({
             <button
               onClick={onCloseRequest}
               aria-label="Fechar detalhes"
-              disabled={!isOpen}
+              disabled={!canRequestClose}
               className="absolute right-6 top-6 z-20 rounded-full border border-white/10 bg-white/5 p-2 text-white/50 transition-all duration-300 hover:rotate-90 hover:bg-white hover:text-black focus:outline-none disabled:pointer-events-none"
             >
               <X size={16} />

@@ -52,6 +52,8 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
   const [isMobile, setIsMobile] = useState(false);
   const [viewportWidth, setViewportWidth] = useState(() => (typeof window !== "undefined" ? window.innerWidth : 390));
   const [isInteracting, setIsInteracting] = useState(false);
+  const [isInView, setIsInView] = useState(true);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const rotationRef = useRef(0);
@@ -82,6 +84,11 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
     isMobileRef.current = isMobile;
   }, [isMobile]);
 
+  const reduceMotionRef = useRef(reduceMotion);
+  useEffect(() => {
+    reduceMotionRef.current = reduceMotion;
+  }, [reduceMotion]);
+
   const selectedCardIdRef = useRef(selectedCardId);
   useEffect(() => {
     selectedCardIdRef.current = selectedCardId;
@@ -99,12 +106,34 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
   // Responsive device check
   useEffect(() => {
     const checkViewport = () => {
+      const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
       setViewportWidth(window.innerWidth);
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 768 || coarsePointer);
     };
     checkViewport();
     window.addEventListener("resize", checkViewport);
     return () => window.removeEventListener("resize", checkViewport);
+  }, []);
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updateMotion = () => setReduceMotion(motionQuery.matches);
+    updateMotion();
+    motionQuery.addEventListener("change", updateMotion);
+    return () => motionQuery.removeEventListener("change", updateMotion);
+  }, []);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting),
+      { root: null, rootMargin: "180px 0px", threshold: 0 }
+    );
+
+    observer.observe(container);
+    return () => observer.disconnect();
   }, []);
 
   // Normalizes any angle to stay within [-180, 180] range
@@ -241,6 +270,8 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
 
   // Main high-precision physics looping
   useEffect(() => {
+    if (!isInView) return;
+
     let active = true;
 
     const loop = () => {
@@ -275,9 +306,11 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
           if (
             timeSinceInteraction > 3000 &&
             selectedCardIdRef.current === null &&
-            transitionPhaseRef.current === "idle"
+            transitionPhaseRef.current === "idle" &&
+            !isMobileRef.current &&
+            !reduceMotionRef.current
           ) {
-            rotationRef.current += isMobileRef.current ? 0.045 : 0.08; // slow majestic velocity
+            rotationRef.current += 0.08; // slow majestic velocity on desktop only
           }
         }
       }
@@ -299,7 +332,7 @@ export default function ThreeDCarousel({ onCardSelect, selectedCardId, transitio
         cancelAnimationFrame(rafId.current);
       }
     };
-  }, [openCardFromCurrentRotation]);
+  }, [openCardFromCurrentRotation, isInView]);
 
   // Drag Interactions via Pointer Events
   const handleDragStart = (clientX: number) => {

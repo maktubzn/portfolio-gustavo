@@ -64,7 +64,7 @@ export default function FooterSection() {
     <footer
       ref={containerRef}
       id="footer"
-      className="h-[70vh] md:h-screen border-t border-white/5 relative z-10 bg-black flex flex-col justify-between items-center py-16 select-none overflow-hidden"
+      className="min-h-[640px] md:h-screen border-t border-white/5 relative z-10 bg-black flex flex-col justify-between items-center py-14 md:py-16 select-none overflow-hidden"
     >
       {/* Decorative top row info */}
       <div className="w-full max-w-6xl mx-auto px-6 flex flex-col gap-3 text-center md:flex-row md:justify-between md:text-left md:items-center text-[10px] tracking-[0.2em] text-white/30 uppercase font-sans">

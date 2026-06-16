@@ -3,19 +3,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, lazy, useEffect, useRef, useState } from "react";
 import { BookOpen, Maximize2, Monitor, Smartphone, Sparkles } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { CARDS_DATA } from "../data";
-import FluidCursor from "./ui/FluidCursor";
 import { CardData, CardViewportRect } from "../types";
 import ImageLightbox from "./ImageLightbox";
 import FlipWords from "./ui/FlipWords";
 import { motion, useMotionValue, useSpring } from "motion/react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const FluidCursor = lazy(() => import("./ui/FluidCursor"));
 
 interface PortfolioItem extends CardData {
   num: string;
@@ -324,7 +325,11 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
       onMouseLeave={() => setIsHovered(false)}
       className="portfolio-light light-showcase relative z-10 flex flex-col items-center border-t border-white/5 bg-black pt-12 pb-24 text-white md:pt-16 md:pb-36"
     >
-      <FluidCursor isActive={isHovered} theme="light" className="!absolute inset-0 !z-0 w-full h-full" />
+      {isHovered && (
+        <Suspense fallback={null}>
+          <FluidCursor isActive theme="light" className="!absolute inset-0 !z-0 w-full h-full" />
+        </Suspense>
+      )}
       <div className="mx-auto w-full max-w-6xl px-6">
         <div className="relative mb-16 flex items-end justify-between gap-8 md:mb-24">
           <motion.div style={{ x: smoothX, y: smoothY }}>
@@ -373,14 +378,14 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
                 ref={(el) => {
                   itemRefs.current[index] = el;
                 }}
-                className="group relative flex w-full md:w-[calc(50%-20px)] lg:w-[calc(33.333%-27px)] min-h-[480px] flex-col rounded-2xl border border-white/[0.06] bg-[#09090b]/80 p-5 shadow-[0_24px_80px_rgba(0,0,0,0.6)] hover:border-white/20 hover:scale-[1.01] hover:shadow-[0_28px_90px_rgba(0,0,0,0.7)] transition-all duration-500 will-change-transform"
+                className="group relative flex w-full md:w-[calc(50%-20px)] lg:w-[calc(33.333%-27px)] min-h-[430px] md:min-h-[480px] flex-col rounded-2xl border border-white/[0.06] bg-[#09090b]/80 p-4 md:p-5 shadow-[0_24px_80px_rgba(0,0,0,0.6)] hover:border-white/20 hover:scale-[1.01] hover:shadow-[0_28px_90px_rgba(0,0,0,0.7)] transition-all duration-500 will-change-transform"
                 style={{ boxShadow: `0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px ${item.accent}15` }}
               >
                 <button
                   type="button"
                   aria-label={`Ver história de ${item.projectName}`}
                   onClick={(event) => openProject(item, event.currentTarget.closest("article"))}
-                  className="portfolio-preview relative h-[340px] overflow-hidden rounded-xl border border-white/[0.06] bg-[#101010] text-left outline-none transition duration-500 hover:border-white/20 focus-visible:ring-2 focus-visible:ring-white/70 md:h-[380px]"
+                  className="portfolio-preview relative h-[285px] sm:h-[320px] overflow-hidden rounded-xl border border-white/[0.06] bg-[#101010] text-left outline-none transition duration-500 hover:border-white/20 focus-visible:ring-2 focus-visible:ring-white/70 md:h-[380px]"
                 >
                   <div
                     ref={(el) => {
@@ -431,7 +436,7 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
                       type="button"
                       aria-label={`Abrir historia de ${item.projectName}`}
                       onClick={(event) => openProject(item, event.currentTarget.closest("article"))}
-                      className="inline-flex h-10 items-center gap-2 rounded-full bg-white px-5 text-xs font-medium text-black transition hover:bg-white/90 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 w-full sm:w-auto justify-center"
+                      className="inline-flex min-h-11 items-center gap-2 rounded-full bg-white px-5 text-xs font-medium text-black transition hover:bg-white/90 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 w-full sm:w-auto justify-center"
                     >
                       <BookOpen size={14} />
                       Ver História
@@ -441,7 +446,7 @@ export default function PortfolioSection({ onProjectOpen }: PortfolioSectionProp
                         type="button"
                         aria-label={`Ampliar imagem de ${item.projectName}`}
                         onClick={() => setLightboxItem(item)}
-                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 shrink-0"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/70 transition hover:border-white/25 hover:bg-white/10 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70 shrink-0"
                       >
                         <Maximize2 size={14} />
                       </button>

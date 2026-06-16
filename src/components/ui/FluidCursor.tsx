@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import useFluidCursor from "../../hooks/useFluidCursor";
 
 interface FluidCursorProps {
@@ -13,12 +13,35 @@ interface FluidCursorProps {
 }
 
 export default function FluidCursor({ isActive, theme = "dark", className }: FluidCursorProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useFluidCursor(canvasRef, isActive, theme);
+  const [canRunWebGL, setCanRunWebGL] = useState(false);
 
-  const defaultClasses = `fixed inset-0 z-0 w-screen h-screen transition-opacity duration-500 ${
-    isActive ? "opacity-100" : "opacity-0"
-  }`;
+  useEffect(() => {
+    const capabilityQuery = window.matchMedia("(pointer: fine)");
+    const motionQuery = window.matchMedia("(prefers-reduced-motion: no-preference)");
+    const updateCapability = () => {
+      setCanRunWebGL(capabilityQuery.matches && motionQuery.matches);
+    };
+
+    updateCapability();
+    capabilityQuery.addEventListener("change", updateCapability);
+    motionQuery.addEventListener("change", updateCapability);
+
+    return () => {
+      capabilityQuery.removeEventListener("change", updateCapability);
+      motionQuery.removeEventListener("change", updateCapability);
+    };
+  }, []);
+
+  if (!isActive || !canRunWebGL) return null;
+
+  return <FluidCursorCanvas theme={theme} className={className} />;
+}
+
+function FluidCursorCanvas({ theme, className }: Pick<FluidCursorProps, "theme" | "className">) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useFluidCursor(canvasRef, true, theme);
+
+  const defaultClasses = "fixed inset-0 z-0 w-screen h-screen opacity-100";
 
   return (
     <div className={`${className || defaultClasses} pointer-events-none`}>

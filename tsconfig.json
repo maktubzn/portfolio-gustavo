@@ -22,5 +22,15 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "_ai_quality_lab",
+    "_prototypes",
+    "scratch",
+    "tools",
+    "playwright-report",
+    "test-results"
+  ]
 }
