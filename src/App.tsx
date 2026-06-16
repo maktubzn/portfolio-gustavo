@@ -45,6 +45,47 @@ const FluidCursor = lazy(() => import("./components/ui/FluidCursor"));
 const Personagem = lazy(() => import("./components/Personagem"));
 const ThreeDCarousel = lazy(() => import("./components/ThreeDCarousel"));
 
+const FONT_CLASSES = [
+  "font-script",      // Cursive (Great Vibes)
+  "font-serif",       // Serif (Abril Fatface)
+  "font-sans",        // Sans (Inter)
+  "font-block",       // Block (Archivo Black)
+  "font-display-alt"  // Display (Shrikhand)
+];
+
+function MorphingName() {
+  const [fontIndex, setFontIndex] = useState(0);
+  const [isBlurring, setIsBlurring] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+
+    const interval = setInterval(() => {
+      setIsBlurring(true);
+      setTimeout(() => {
+        setFontIndex((prev) => (prev + 1) % FONT_CLASSES.length);
+        setIsBlurring(false);
+      }, 300);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [shouldReduceMotion]);
+
+  return (
+    <span
+      className={`inline-block transition-all duration-300 ease-in-out ${FONT_CLASSES[fontIndex]}`}
+      style={{
+        filter: !shouldReduceMotion && isBlurring ? "blur(8px)" : "blur(0px)",
+        opacity: !shouldReduceMotion && isBlurring ? 0.35 : 1,
+        transform: !shouldReduceMotion && isBlurring ? "scale(0.96)" : "scale(1)",
+        textTransform: "none",
+      }}
+    >
+      Gustavo Alves
+    </span>
+  );
+}
+
 export default function App() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [transitionPhase, setTransitionPhase] = useState<CardTransitionPhase>("idle");
@@ -401,17 +442,19 @@ export default function App() {
           >
             {/* Main big serif title */}
             <h1 className="hero-title font-serif text-white font-light text-[38px] sm:text-[48px] md:text-[62px] leading-[1.10] md:leading-[1.15] tracking-normal max-w-3xl antialiased">
-              {HERO_CONTENT.titleLines.map((line, index) => (
-                <span key={line} className={`hero-title__line hero-title__line--${index + 1}`}>
-                  {line}
-                  {index < HERO_CONTENT.titleLines.length - 1 && (
-                    <>
-                      <br className="hidden sm:inline" />
-                      <span className="sm:hidden"> </span>
-                    </>
-                  )}
-                </span>
-              ))}
+              <span className="hero-title__line hero-title__line--1">
+                <MorphingName />
+              </span>
+              <br className="sm:hidden" />
+              <span className="hidden sm:inline"> </span>
+              <span className="hero-title__line hero-title__line--2">
+                {HERO_CONTENT.titleLines[1]}
+              </span>
+              <br className="sm:hidden" />
+              <span className="hidden sm:inline"> </span>
+              <span className="hero-title__line hero-title__line--3">
+                {HERO_CONTENT.titleLines[2]}
+              </span>
             </h1>
           </motion.div>
 
