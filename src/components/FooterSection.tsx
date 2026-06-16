@@ -26,6 +26,12 @@ export default function FooterSection() {
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+    const useStaticFooter =
+      window.matchMedia("(max-width: 767px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (useStaticFooter) return;
 
     const scroller = container.closest(".custom-scrollbar") as HTMLElement | null;
 
@@ -90,10 +96,10 @@ export default function FooterSection() {
       {/* Bottom row info */}
       <div className="w-full max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-[9px] tracking-[0.16em] text-white/30 uppercase font-sans">
         <div className="flex flex-col items-center gap-2 md:items-start">
-          <a href="mailto:gustavoalvesmp.dev@gmail.com" className="break-all text-center hover:text-white transition-colors duration-300 no-underline md:text-left">
+          <a href="mailto:gustavoalvesmp.dev@gmail.com" className="min-h-11 inline-flex items-center break-all text-center hover:text-white transition-colors duration-300 no-underline md:text-left">
             gustavoalvesmp.dev@gmail.com
           </a>
-          <a href="tel:+5511975656474" className="hover:text-white transition-colors duration-300 no-underline">
+          <a href="tel:+5511975656474" className="min-h-11 inline-flex items-center hover:text-white transition-colors duration-300 no-underline">
             (11) 97565-6474
           </a>
         </div>
@@ -102,7 +108,7 @@ export default function FooterSection() {
             href="https://www.linkedin.com/in/gustavo-alves-7a81603a9"
             target="_blank"
             rel="noreferrer"
-            className="break-all text-center hover:text-white transition-colors duration-300 no-underline"
+            className="min-h-11 inline-flex items-center break-all text-center hover:text-white transition-colors duration-300 no-underline"
           >
             linkedin.com/in/gustavo-alves-7a81603a9
           </a>
@@ -110,12 +116,12 @@ export default function FooterSection() {
             href="https://github.com/maktubzn"
             target="_blank"
             rel="noreferrer"
-            className="break-all text-center hover:text-white transition-colors duration-300 no-underline"
+            className="min-h-11 inline-flex items-center break-all text-center hover:text-white transition-colors duration-300 no-underline"
           >
             github.com/maktubzn
           </a>
         </div>
-        <a href="#hero" className="hover:text-white transition-colors duration-300 no-underline">
+        <a href="#hero" className="min-h-11 inline-flex items-center hover:text-white transition-colors duration-300 no-underline">
           Voltar ao topo ↑
         </a>
       </div>

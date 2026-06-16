@@ -56,7 +56,7 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
               : isLightZoneActive
                 ? "text-zinc-950 hover:text-zinc-700"
                 : "text-white hover:text-white/80"
-          }`}
+          } min-h-11 inline-flex items-center`}
         >
           Gustavo Alves
         </a>
@@ -95,7 +95,7 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
 
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className={`pointer-events-auto md:hidden p-2 z-50 cursor-pointer backdrop-blur-lg rounded-full focus:outline-none focus-visible:ring-2 transition-colors ${
+        className={`pointer-events-auto md:hidden min-h-11 min-w-11 inline-flex items-center justify-center p-0 z-50 cursor-pointer backdrop-blur-lg rounded-full focus:outline-none focus-visible:ring-2 transition-colors ${
           mobileMenuOpen
             ? "text-white/80 hover:text-white border border-white/[0.08] bg-black/40 focus-visible:ring-white/60"
             : isLightZoneActive
@@ -104,7 +104,7 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
         }`}
         aria-label="Alternar menu de navegacao"
       >
-        {mobileMenuOpen ? <X size={16} /> : <Menu size={16} />}
+        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {mobileMenuOpen && (
@@ -117,7 +117,7 @@ export default function Header({ isAboutActive = false, isLightZoneActive = fals
                 setMobileMenuOpen(false);
                 setTimeout(() => scrollToTarget(item.targetId), 150);
               }}
-              className="text-white/70 hover:text-white font-sans text-xl tracking-[0.2em] uppercase no-underline transition-all duration-300 py-3 px-8 rounded-full border border-white/[0.03] bg-white/[0.02] hover:bg-white/[0.06] active:scale-95"
+              className="min-h-12 inline-flex items-center justify-center text-white/70 hover:text-white font-sans text-xl tracking-[0.2em] uppercase no-underline transition-all duration-300 py-3 px-8 rounded-full border border-white/[0.03] bg-white/[0.02] hover:bg-white/[0.06] active:scale-95"
             >
               {item.label}
             </a>

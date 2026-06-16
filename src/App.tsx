@@ -18,13 +18,12 @@
 import { Suspense, lazy, useState, useEffect, useRef, useMemo, type MouseEvent } from "react";
 
 import { AnimatePresence, motion, useMotionValue, useSpring, useReducedMotion, useTransform } from "motion/react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import "lenis/dist/lenis.css";
 import Header from "./components/Header";
 import CustomCursor from "./components/CustomCursor";
-import ThreeDCarousel from "./components/ThreeDCarousel";
-import Personagem from "./components/Personagem";
 import AboutSection from "./components/AboutSection";
 import QaLabImmersiveTransition from "./components/QaLabImmersiveTransition";
 import PortfolioSection from "./components/PortfolioSection";
@@ -34,6 +33,7 @@ import VideoNarrativeSection from "./components/VideoNarrativeSection";
 import LoadingScreen from "./components/LoadingScreen";
 import { usePortfolioLoader } from "./hooks/usePortfolioLoader";
 import { useLenis } from "./hooks/useLenis";
+import { useViewportCapability } from "./hooks/useViewportCapability";
 import { CARDS_DATA, HERO_CONTENT } from "./data";
 import { CardTransitionPhase, CardViewportRect } from "./types";
 
@@ -42,6 +42,8 @@ gsap.registerPlugin(ScrollTrigger);
 const ExpandedModal = lazy(() => import("./components/ExpandedModal"));
 const ProjectPresentationView = lazy(() => import("./components/ProjectPresentationView"));
 const FluidCursor = lazy(() => import("./components/ui/FluidCursor"));
+const Personagem = lazy(() => import("./components/Personagem"));
+const ThreeDCarousel = lazy(() => import("./components/ThreeDCarousel"));
 
 export default function App() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
@@ -59,9 +61,13 @@ export default function App() {
   const [activeView, setActiveView] = useState<"carousel-modal" | "project-presentation" | "idle">("idle");
   const [isHoveringPortfolio, setIsHoveringPortfolio] = useState(false);
   const [isHoveringHero, setIsHoveringHero] = useState(false);
+  const [mobileHeroIndex, setMobileHeroIndex] = useState(0);
+  const capability = useViewportCapability();
+  const isCompactExperience = capability.isCompact || capability.coarsePointer || capability.reducedMotion;
 
   const characterWrapperRef = useRef<HTMLDivElement>(null);
   const carouselWrapperRef = useRef<HTMLDivElement>(null);
+  const mobileProjectsTrackRef = useRef<HTMLDivElement>(null);
 
   // 1. Loading Screen & Asset Loading Setup
   const [showLoader, setShowLoader] = useState(true);
@@ -72,7 +78,7 @@ export default function App() {
   ], []);
 
   // Lightweight loader: fonts + card images only
-  const { progress, isReady } = usePortfolioLoader(imageUrls);
+  const { progress, isReady } = usePortfolioLoader(imageUrls, { mobileImageLimit: 2 });
 
   const isModalActive = selectedCardId !== null && activeView === "carousel-modal" && transitionPhase !== "idle";
   const isPresentationActive = selectedCardId !== null && activeView === "project-presentation" && transitionPhase !== "idle";
@@ -123,7 +129,7 @@ export default function App() {
 
   // GSAP Pinning and Zoom transition for Hero section
   useEffect(() => {
-    if (showLoader || shouldReduceMotion) return;
+    if (showLoader || shouldReduceMotion || isCompactExperience) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -167,7 +173,7 @@ export default function App() {
     });
 
     return () => ctx.revert();
-  }, [showLoader, shouldReduceMotion]);
+  }, [isCompactExperience, showLoader, shouldReduceMotion]);
 
   const handlePageScroll = () => {
     if (showLoader) return;
@@ -272,6 +278,61 @@ export default function App() {
     }
   };
 
+  const handleMobileCardSelect = (cardId: number, event: MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    handleCardSelect(cardId, {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+    });
+  };
+
+  const scrollMobileHeroProject = (direction: -1 | 1) => {
+    const nextIndex = Math.min(CARDS_DATA.length - 1, Math.max(0, mobileHeroIndex + direction));
+    const track = mobileProjectsTrackRef.current;
+    const target = track?.querySelector<HTMLElement>(`[data-mobile-project-index="${nextIndex}"]`);
+
+    setMobileHeroIndex(nextIndex);
+    target?.scrollIntoView({ behavior: shouldReduceMotion ? "auto" : "smooth", inline: "center", block: "nearest" });
+  };
+
+  useEffect(() => {
+    const track = mobileProjectsTrackRef.current;
+    if (!track || !isCompactExperience) return;
+
+    let frame = 0;
+    const updateActiveIndex = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const trackRect = track.getBoundingClientRect();
+        const center = trackRect.left + trackRect.width / 2;
+        let nearestIndex = 0;
+        let nearestDistance = Number.POSITIVE_INFINITY;
+
+        track.querySelectorAll<HTMLElement>("[data-mobile-project-index]").forEach((item) => {
+          const rect = item.getBoundingClientRect();
+          const itemCenter = rect.left + rect.width / 2;
+          const distance = Math.abs(center - itemCenter);
+          if (distance < nearestDistance) {
+            nearestDistance = distance;
+            nearestIndex = Number(item.dataset.mobileProjectIndex ?? 0);
+          }
+        });
+
+        setMobileHeroIndex(nearestIndex);
+      });
+    };
+
+    track.addEventListener("scroll", updateActiveIndex, { passive: true });
+    updateActiveIndex();
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      track.removeEventListener("scroll", updateActiveIndex);
+    };
+  }, [isCompactExperience]);
+
   const activeCard = CARDS_DATA.find((c) => c.id === selectedCardId) || null;
 
   return (
@@ -314,7 +375,13 @@ export default function App() {
           style={{
             scale: shouldReduceMotion ? 1 : heroScale,
             opacity: isModalActive ? 0.52 : shouldReduceMotion ? 1 : heroOpacity,
-            filter: isModalActive ? "blur(2px) brightness(0.72)" : shouldReduceMotion ? "none" : heroFilter,
+            filter: isCompactExperience
+              ? "none"
+              : isModalActive
+                ? "blur(2px) brightness(0.72)"
+                : shouldReduceMotion
+                  ? "none"
+                  : heroFilter,
             transition: "filter 800ms cubic-bezier(0.16, 1, 0.3, 1), transform 800ms cubic-bezier(0.16, 1, 0.3, 1), opacity 800ms cubic-bezier(0.16, 1, 0.3, 1)",
             transformOrigin: "50% 42%",
           }}
@@ -355,26 +422,88 @@ export default function App() {
               ref={characterWrapperRef} 
               className="absolute w-[300px] h-[300px] md:w-[380px] md:h-[380px] z-10 flex items-center justify-center pointer-events-none select-none transition-opacity duration-300"
             >
-              <Personagem />
+              {!isCompactExperience && (
+                <Suspense fallback={null}>
+                  <Personagem />
+                </Suspense>
+              )}
             </div>
 
             {/* Math-driven 3D Rotary Carousel */}
-            <div 
-              ref={carouselWrapperRef} 
-              className="w-full relative z-20"
-              style={{
-                transformStyle: "preserve-3d",
-                perspective: "1000px",
-                opacity: shouldReduceMotion ? 1 : 0,
-                transform: shouldReduceMotion ? "none" : "translateY(85vh) scale(0.35) rotateX(35deg)",
-              }}
-            >
-              <ThreeDCarousel
-                selectedCardId={selectedCardId}
-                transitionPhase={transitionPhase}
-                onCardSelect={handleCardSelect}
-              />
-            </div>
+            {isCompactExperience ? (
+              <div className="mobile-hero-projects" aria-label="Projetos em destaque">
+                <div className="mobile-hero-projects__topline">
+                  <span>Projetos</span>
+                  <div aria-hidden="true">
+                    {mobileHeroIndex + 1}/{CARDS_DATA.length}
+                  </div>
+                </div>
+
+                <div ref={mobileProjectsTrackRef} className="mobile-hero-projects__track">
+                  {CARDS_DATA.map((card, index) => (
+                    <button
+                      key={card.id}
+                      type="button"
+                      data-mobile-project-index={index}
+                      className="mobile-hero-projects__card"
+                      onClick={(event) => handleMobileCardSelect(card.id, event)}
+                    >
+                      <img
+                        src={card.imageUrl}
+                        alt=""
+                        loading={index < 2 ? "eager" : "lazy"}
+                        decoding="async"
+                      />
+                      <span>{card.projectName}</span>
+                      <small>{card.category}</small>
+                    </button>
+                  ))}
+                </div>
+
+                <div className="mobile-hero-projects__controls">
+                  <button
+                    type="button"
+                    aria-label="Projeto anterior"
+                    onClick={() => scrollMobileHeroProject(-1)}
+                    disabled={mobileHeroIndex === 0}
+                  >
+                    <ChevronLeft size={18} aria-hidden="true" />
+                  </button>
+                  <div className="mobile-hero-projects__dots" aria-hidden="true">
+                    {CARDS_DATA.map((card, index) => (
+                      <span key={card.id} className={index === mobileHeroIndex ? "is-active" : ""} />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Proximo projeto"
+                    onClick={() => scrollMobileHeroProject(1)}
+                    disabled={mobileHeroIndex === CARDS_DATA.length - 1}
+                  >
+                    <ChevronRight size={18} aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                ref={carouselWrapperRef} 
+                className="w-full relative z-20"
+                style={{
+                  transformStyle: "preserve-3d",
+                  perspective: "1000px",
+                  opacity: shouldReduceMotion ? 1 : 0,
+                  transform: shouldReduceMotion ? "none" : "translateY(85vh) scale(0.35) rotateX(35deg)",
+                }}
+              >
+                <Suspense fallback={null}>
+                  <ThreeDCarousel
+                    selectedCardId={selectedCardId}
+                    transitionPhase={transitionPhase}
+                    onCardSelect={handleCardSelect}
+                  />
+                </Suspense>
+              </div>
+            )}
           </div>
 
           {/* elegant downward indicator */}
@@ -506,10 +635,10 @@ export default function App() {
       </AnimatePresence>
 
       {/* Decoupled custom pointer mouse handler (disabled on touch devices) */}
-      {!isAboutActive && !showLoader && <CustomCursor />}
+      {!isAboutActive && !showLoader && !isCompactExperience && capability.finePointer && !capability.reducedMotion && <CustomCursor />}
 
       {/* Fluid WebGL Smoke Trail Cursor (active only over hero or inside presentation modal) */}
-      {(isHoveringHero || isPresentationActive) && (
+      {!isCompactExperience && capability.finePointer && !capability.reducedMotion && (isHoveringHero || isPresentationActive) && (
         <Suspense fallback={null}>
           <FluidCursor isActive theme="dark" />
         </Suspense>

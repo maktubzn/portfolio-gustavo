@@ -121,12 +121,12 @@ export default function QaLabImmersiveTransition() {
       const finalHeader = q(".qa-immersive__final-header");
       const finalCards = q(".qa-immersive__card");
 
-      if (reducedMotion) {
+      if (reducedMotion || compactViewport) {
         gsap.set(lightWash, { autoAlpha: 1 });
         gsap.set(intro, { autoAlpha: 0 });
-        gsap.set(bento, { autoAlpha: 0 });
-        gsap.set(finalHeader, { autoAlpha: 1, y: 0 });
-        gsap.set(finalCards, { autoAlpha: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)" });
+        if (bento.length) gsap.set(bento, { autoAlpha: 0 });
+        gsap.set(finalHeader, { autoAlpha: 1, y: 0, clearProps: "filter" });
+        gsap.set(finalCards, { autoAlpha: 1, x: 0, y: 0, scale: 1, clearProps: "filter" });
         return;
       }
 
@@ -205,14 +205,14 @@ export default function QaLabImmersiveTransition() {
     <section 
       ref={sectionRef} 
       id="benefits" 
-      className="qa-immersive" 
+      className={`qa-immersive ${compactViewport ? "qa-immersive--mobile-lite" : ""}`}
       aria-label="QA Lab"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="qa-immersive__stage">
         <div className="qa-immersive__light-wash" aria-hidden="true" />
-        {isHovered && (
+        {isHovered && !compactViewport && !reducedMotion && (
           <Suspense fallback={null}>
             <FluidCursor isActive theme="light" className="absolute inset-0 z-[2] w-full h-full" />
           </Suspense>
@@ -223,46 +223,48 @@ export default function QaLabImmersiveTransition() {
           <p>Telas, evidencias e testes virando uma area limpa.</p>
         </div>
 
-        <div className="qa-immersive__bento" aria-hidden="true">
-          {DECORATIVE_SCREENS.map((screen) => (
-            <div key={screen.src} className={`qa-immersive__panel ${screen.className}`}>
-              <img src={screen.src} alt={screen.alt} draggable={false} />
-            </div>
-          ))}
+        {!compactViewport && (
+          <div className="qa-immersive__bento" aria-hidden="true">
+            {DECORATIVE_SCREENS.map((screen) => (
+              <div key={screen.src} className={`qa-immersive__panel ${screen.className}`}>
+                <img src={screen.src} alt={screen.alt} draggable={false} loading="lazy" decoding="async" />
+              </div>
+            ))}
 
-          <div className="qa-immersive__portal">
-            <div className="qa-immersive__portal-topbar">
-              <span />
-              <span />
-              <span />
-              <strong>QA LAB / LIVE BOARD</strong>
-            </div>
-            <div className="qa-immersive__portal-detail qa-immersive__portal-hero">
-              <span>Suite status</span>
-              <strong>87%</strong>
-              <p>Fluxos principais em validacao</p>
-            </div>
-            <div className="qa-immersive__portal-detail qa-immersive__portal-grid">
-              <div>
-                <span>Manual</span>
-                <strong>12</strong>
+            <div className="qa-immersive__portal">
+              <div className="qa-immersive__portal-topbar">
+                <span />
+                <span />
+                <span />
+                <strong>QA LAB / LIVE BOARD</strong>
               </div>
-              <div>
-                <span>Bugs</span>
-                <strong>04</strong>
+              <div className="qa-immersive__portal-detail qa-immersive__portal-hero">
+                <span>Suite status</span>
+                <strong>87%</strong>
+                <p>Fluxos principais em validacao</p>
               </div>
-              <div>
-                <span>E2E</span>
-                <strong>08</strong>
+              <div className="qa-immersive__portal-detail qa-immersive__portal-grid">
+                <div>
+                  <span>Manual</span>
+                  <strong>12</strong>
+                </div>
+                <div>
+                  <span>Bugs</span>
+                  <strong>04</strong>
+                </div>
+                <div>
+                  <span>E2E</span>
+                  <strong>08</strong>
+                </div>
               </div>
-            </div>
-            <div className="qa-immersive__portal-detail qa-immersive__portal-log">
-              <span>POST /checkout</span>
-              <span>UI responsive check</span>
-              <span>Evidence attached</span>
+              <div className="qa-immersive__portal-detail qa-immersive__portal-log">
+                <span>POST /checkout</span>
+                <span>UI responsive check</span>
+                <span>Evidence attached</span>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="qa-immersive__final">
           <div className="qa-immersive__final-header">

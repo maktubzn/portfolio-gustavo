@@ -16,6 +16,18 @@ export function useLenis() {
   const lenisRef = useRef<Lenis | null>(null);
 
   useEffect(() => {
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    const shouldUseNativeScroll =
+      window.matchMedia("(max-width: 767px)").matches ||
+      window.matchMedia("(pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      Boolean(connection?.saveData);
+
+    if (shouldUseNativeScroll) {
+      (window as any).lenis = undefined;
+      return;
+    }
+
     // Inicialização do Lenis no viewport (window)
     const lenis = new Lenis({
       duration: 1.1,

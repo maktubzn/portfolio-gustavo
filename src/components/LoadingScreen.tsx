@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useMemo, useState } from "react";
 import gsap from "gsap";
 
 interface LoadingScreenProps {
@@ -8,14 +8,13 @@ interface LoadingScreenProps {
 }
 
 const DIAGNOSTICS = [
-  { threshold: 5, text: "> Initializing QA Diagnostic Suite..." },
-  { threshold: 20, text: "> Checking responsive viewport grids..." },
-  { threshold: 35, text: "> Validating DOM node hierarchies... [OK]" },
-  { threshold: 50, text: "> Loading project evidence images..." },
-  { threshold: 65, text: "> Mapping GSAP ScrollTrigger timelines... [OK]" },
-  { threshold: 80, text: "> Initializing WebGL fluid trail buffer..." },
-  { threshold: 92, text: "> Starting Three.js 3D canvas mesh..." },
-  { threshold: 100, text: "> Diagnostics complete. System ready." },
+  { threshold: 8, text: "> Preparing critical typefaces..." },
+  { threshold: 24, text: "> Loading above-the-fold visuals..." },
+  { threshold: 42, text: "> Applying mobile motion budget..." },
+  { threshold: 58, text: "> Deferring below-the-fold video..." },
+  { threshold: 74, text: "> Checking touch-first layout..." },
+  { threshold: 90, text: "> Warming navigation targets..." },
+  { threshold: 100, text: "> Critical experience ready." },
 ];
 
 export default function LoadingScreen({ progress, isReady, onFadeComplete }: LoadingScreenProps) {
@@ -29,6 +28,28 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
   const progressVal = useRef(0);
   const fadeStarted = useRef(false);
   const printedLogs = useRef<Set<number>>(new Set());
+  const [compactMotion, setCompactMotion] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return (
+      window.matchMedia("(max-width: 767px), (pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    );
+  });
+
+  useEffect(() => {
+    const compactQuery = window.matchMedia("(max-width: 767px), (pointer: coarse)");
+    const reducedQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setCompactMotion(compactQuery.matches || reducedQuery.matches);
+
+    update();
+    compactQuery.addEventListener("change", update);
+    reducedQuery.addEventListener("change", update);
+
+    return () => {
+      compactQuery.removeEventListener("change", update);
+      reducedQuery.removeEventListener("change", update);
+    };
+  }, []);
 
   // Helper to trigger the exit timeline
   const triggerFade = useCallback(() => {
@@ -46,7 +67,7 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
     tl.to(titleRef.current, {
       opacity: 0,
       y: -20,
-      filter: "blur(6px)",
+      filter: compactMotion ? "none" : "blur(6px)",
       duration: 0.8,
       ease: "power2.in"
     }, 0);
@@ -71,7 +92,7 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
       duration: 1.2,
       ease: "power3.inOut"
     }, 0.4);
-  }, [onFadeComplete]);
+  }, [compactMotion, onFadeComplete]);
 
   // Interpolate display progress to match actual progress smoothly
   useEffect(() => {
@@ -123,6 +144,11 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
 
   // Title character reveal animation on mount
   useEffect(() => {
+    if (compactMotion) {
+      gsap.set(titleRef.current?.querySelectorAll(".reveal-char") ?? [], { opacity: 1, y: 0, filter: "none" });
+      return;
+    }
+
     const chars = titleRef.current?.querySelectorAll(".reveal-char");
     if (chars && chars.length > 0) {
       gsap.fromTo(chars, 
@@ -138,10 +164,10 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
         }
       );
     }
-  }, []);
+  }, [compactMotion]);
 
-  // Generate 35 background particles with pure CSS animations
-  const particles = Array.from({ length: 35 }).map((_, i) => {
+  // Generate a bounded amount of background particles. Mobile gets a lighter HUD.
+  const particles = useMemo(() => Array.from({ length: compactMotion ? 8 : 35 }).map((_, i) => {
     const size = Math.random() * 2.5 + 0.8; // 0.8px to 3.3px
     const left = Math.random() * 100; // 0% to 100%
     const duration = Math.random() * 10 + 6; // 6s to 16s
@@ -161,11 +187,11 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
           animationDuration: `${duration}s`,
           animationDelay: `${delay}s`,
           "--particle-opacity": opacity,
-          willChange: "transform, opacity",
+          willChange: compactMotion ? "auto" : "transform, opacity",
         } as React.CSSProperties}
       />
     );
-  });
+  }), [compactMotion]);
 
   // Split name for staggered reveal
   const name = "GUSTAVO ALVES";
@@ -181,7 +207,7 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
       <span
         key={index}
         className="reveal-char inline-block"
-        style={{ willChange: "transform, opacity, filter" }}
+        style={{ willChange: compactMotion ? "auto" : "transform, opacity, filter" }}
       >
         {char}
       </span>
@@ -192,7 +218,9 @@ export default function LoadingScreen({ progress, isReady, onFadeComplete }: Loa
     <div
       ref={containerRef}
       data-testid="portfolio-loader"
-      className="fixed inset-0 w-full h-full z-[99999] flex flex-col justify-between items-center bg-[#050505] text-white overflow-hidden pointer-events-auto"
+      className={`fixed inset-0 w-full h-full z-[99999] flex flex-col justify-between items-center bg-[#050505] text-white overflow-hidden pointer-events-auto ${
+        compactMotion ? "portfolio-loader--compact" : ""
+      }`}
       style={{ willChange: "opacity" }}
     >
       {/* Background Particle Container */}

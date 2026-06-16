@@ -101,7 +101,7 @@ export default function AboutSection() {
 
   useEffect(() => {
     const section = sectionRef.current;
-    if (!section || shouldLoadVideo) return;
+    if (!section || shouldLoadVideo || compactViewport) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -115,11 +115,11 @@ export default function AboutSection() {
 
     observer.observe(section);
     return () => observer.disconnect();
-  }, [shouldLoadVideo]);
+  }, [compactViewport, shouldLoadVideo]);
 
   // Monitor and extract video duration on loadedmetadata
   useEffect(() => {
-    if (!shouldLoadVideo) return;
+    if (!shouldLoadVideo || compactViewport) return;
 
     const video = videoRef.current;
     if (!video) return;
@@ -129,10 +129,11 @@ export default function AboutSection() {
         setVideoDuration(video.duration);
         setIsVideoLoaded(true);
 
-        // Prime the hardware decoder (play and pause immediately) to avoid black screen or lag on first seek
-        video.play().then(() => {
-          video.pause();
-        }).catch(() => {});
+        if (!isMobileDevice()) {
+          video.play().then(() => {
+            video.pause();
+          }).catch(() => {});
+        }
       }
     };
 
@@ -145,7 +146,7 @@ export default function AboutSection() {
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
-  }, [shouldLoadVideo]);
+  }, [compactViewport, shouldLoadVideo]);
 
   // GSAP ScrollTrigger timeline configuration
   useGSAP(
@@ -153,13 +154,12 @@ export default function AboutSection() {
       const isMobile = isMobileDevice();
       const reducedMotion = getInitialReducedMotion();
 
-      // Reduced motion bypass
-      if (reducedMotion) {
-        gsap.set(copyRefs.current.filter(Boolean), { autoAlpha: 0, y: 0 });
-        gsap.set(finalCopyRef.current, { autoAlpha: 1, y: 0, scale: 1 });
+      // Reduced/mobile bypass: static editorial section, no pinning or video work.
+      if (reducedMotion || compactViewport) {
+        gsap.set(copyRefs.current.filter(Boolean), { autoAlpha: 1, y: 0, clearProps: "visibility" });
+        gsap.set(finalCopyRef.current, { autoAlpha: 1, y: 0, scale: 1, clearProps: "visibility" });
         const video = videoRef.current;
         if (video) {
-          video.currentTime = videoDuration || 5;
           video.pause();
         }
         return;
@@ -222,9 +222,6 @@ export default function AboutSection() {
           },
           0.18
         );
-      } else {
-        // Fallback mobile: play video in background loop naturally
-        video.play().catch(() => {});
       }
 
       // Scene 3: Copy Blocks entrance & exit animations
@@ -296,15 +293,15 @@ export default function AboutSection() {
       ref={sectionRef}
       id="about"
       aria-label="Sobre em experiencia cinematografica"
-      className="cinematic-about"
+      className={`cinematic-about ${compactViewport ? "cinematic-about--mobile-lite" : ""}`}
     >
       <video
         ref={videoRef}
-        src={shouldLoadVideo ? VIDEO_SRC : undefined}
+        src={shouldLoadVideo && !compactViewport ? VIDEO_SRC : undefined}
         className="cinematic-about__video"
         muted
         playsInline
-        preload="metadata"
+        preload={compactViewport ? "none" : "metadata"}
         style={{ willChange: "transform" }}
         aria-hidden="true"
       />
@@ -313,7 +310,7 @@ export default function AboutSection() {
       <div className="cinematic-about__top-vignette" />
       <div className="cinematic-about__bottom-vignette" />
 
-      {!isVideoLoaded && (
+      {!compactViewport && !isVideoLoaded && (
         <div className="cinematic-about__loader" aria-hidden="true">
           <div className="cinematic-about__loader-track">
             <div className="cinematic-about__loader-bar cinematic-about__loader-bar--indeterminate" />

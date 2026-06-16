@@ -78,7 +78,10 @@ export default function VideoNarrativeSection({
   useEffect(() => {
     const section = sectionRef.current;
     const video = videoRef.current;
-    if (!section || !video || reducedMotion) return;
+    if (!section || !video || reducedMotion || compactViewport) {
+      video?.pause();
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -107,16 +110,16 @@ export default function VideoNarrativeSection({
       const cta = ctaRef.current;
       const activeMoments = momentRefs.current.filter(Boolean);
 
-      if (reducedMotion) {
+      if (reducedMotion || compactViewport) {
         if (video) {
           video.pause();
           video.currentTime = variant === "impact" ? 2 : 5;
         }
-        gsap.set(content, { autoAlpha: 1, y: 0, xPercent: 0, scale: 1, filter: "blur(0px)" });
-        gsap.set(media, { autoAlpha: 1, xPercent: 0, scale: 1, filter: "blur(0px)" });
-        gsap.set(activeMoments, { autoAlpha: 1, y: 0, filter: "blur(0px)" });
+        gsap.set(content, { autoAlpha: 1, y: 0, xPercent: 0, scale: 1, clearProps: "filter" });
+        gsap.set(media, { autoAlpha: compactViewport ? 0 : 1, xPercent: 0, scale: 1, clearProps: "filter" });
+        gsap.set(activeMoments, { autoAlpha: 1, y: 0, clearProps: "filter" });
         gsap.set(line, { scaleY: 1 });
-        gsap.set(cta, { autoAlpha: 1, y: 0 });
+        if (cta) gsap.set(cta, { autoAlpha: 1, y: 0 });
         return;
       }
 
@@ -240,7 +243,7 @@ export default function VideoNarrativeSection({
       id={id}
       className={`video-narrative video-narrative--${variant} ${
         reducedMotion ? "video-narrative--reduced" : ""
-      }`}
+      } ${compactViewport ? "video-narrative--mobile-lite" : ""}`}
       aria-label={eyebrow}
     >
       <div className="video-narrative__stage">
@@ -248,12 +251,12 @@ export default function VideoNarrativeSection({
           <video
             ref={videoRef}
             className="video-narrative__video"
-            src={videoSrc}
+            src={!compactViewport ? videoSrc : undefined}
             muted
             playsInline
             loop
-            autoPlay={!reducedMotion}
-            preload="metadata"
+            autoPlay={!reducedMotion && !compactViewport}
+            preload={!compactViewport ? "metadata" : "none"}
             aria-hidden="true"
           />
         </div>
