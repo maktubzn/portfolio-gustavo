@@ -66,6 +66,7 @@ start.bat
 
 # === Docs internos de desenvolvimento ===
 docs/
+relatPer.md
 
 # === Screenshots / Imagens avulsas na raiz ===
 *.png

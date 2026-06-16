@@ -59,6 +59,7 @@ export default function ExpandedModal({
   onCloseRequest,
   onCloseComplete,
 }: ExpandedModalProps) {
+  console.log("[REACT COMPONENT] ExpandedModal rendered with phase:", phase);
   const [targetRect, setTargetRect] = useState<CardViewportRect>(() => getModalRect());
   const shouldReduceMotion = useReducedMotion();
 
@@ -79,6 +80,26 @@ export default function ExpandedModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onCloseRequest, phase]);
+
+  useEffect(() => {
+    if (phase === "opening") {
+      const duration = shouldReduceMotion ? 150 : 550;
+      const timer = setTimeout(() => {
+        onOpenComplete();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, onOpenComplete, shouldReduceMotion]);
+
+  useEffect(() => {
+    if (phase === "closing") {
+      const duration = shouldReduceMotion ? 150 : 550;
+      const timer = setTimeout(() => {
+        onCloseComplete();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, onCloseComplete, shouldReduceMotion]);
 
   const animatedRect = phase === "closing" ? originRect : targetRect;
   const isOpen = phase === "open";
@@ -132,10 +153,6 @@ export default function ExpandedModal({
           opacity: 1,
         }}
         transition={shellTransition}
-        onAnimationComplete={() => {
-          if (phase === "opening") onOpenComplete();
-          if (phase === "closing") onCloseComplete();
-        }}
         className="fixed left-0 top-0 overflow-hidden border border-white/[0.08] bg-[#0c0c0e] shadow-[0_45px_100px_rgba(0,0,0,0.95)]"
       >
         {/* Cover image during opening/closing transition */}
