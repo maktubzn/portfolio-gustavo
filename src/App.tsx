@@ -445,13 +445,11 @@ export default function App() {
               <span className="hero-title__line hero-title__line--1">
                 <MorphingName />
               </span>
-              <br className="sm:hidden" />
-              <span className="hidden sm:inline"> </span>
+              <br />
               <span className="hero-title__line hero-title__line--2">
                 {HERO_CONTENT.titleLines[1]}
               </span>
-              <br className="sm:hidden" />
-              <span className="hidden sm:inline"> </span>
+              <br />
               <span className="hero-title__line hero-title__line--3">
                 {HERO_CONTENT.titleLines[2]}
               </span>
